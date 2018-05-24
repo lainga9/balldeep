@@ -32,8 +32,7 @@
               "...",
               "php artisan vendor:publish --provider=\"Lainga9\\BallDeep\\BallDeepServiceProvider\" --force",
               "php artisan vendor:publish --provider=\"Spatie\\MediaLibrary\\MediaLibraryServiceProvider\" --tag=\"migrations\"",
-              "php artisan vendor:publish --provider=\"Spatie\\MediaLibrary\\MediaLibraryServiceProvider\" --tag=\"config\"",
-              "php artisan db:seed --class=\"BdPostTypesTableSeeder\""
+              "php artisan vendor:publish --provider=\"Spatie\\MediaLibrary\\MediaLibraryServiceProvider\" --tag=\"config\""
         ],
         "post-update-cmd": [
               "...",

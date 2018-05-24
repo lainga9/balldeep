@@ -19,9 +19,12 @@ class CreatePostsTable extends Migration
             $table->string('slug');
             $table->string('name');
             $table->string('excerpt');
-            $table->text('content');
-            $table->integer('post_type_id')->index();
+            $table->text('content')->nullable();
             $table->boolean('published')->default(1);
+            $table->integer('post_type_id')->index();
+            $table->integer('post_parent_id')->index()->default(0);
+            $table->integer('media_id')->index()->nullable();
+            $table->integer('user_id')->index();
             $table->timestamps();
         });
     }

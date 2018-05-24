@@ -3,25 +3,62 @@
 namespace Lainga9\BallDeep\app;
 
 use Illuminate\Database\Eloquent\Model as EloquentModel;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\MediaLibrary\Models\Media;
 
-class Model extends EloquentModel implements HasMedia {
+class Model extends EloquentModel {
 
-	use HasMediaTrait;
-
-	public function registerMediaConversions(Media $media = null)
+	/**
+	 * Return only thos models which the given
+	 * user should be able to see depending on their
+	 * user role
+	 * 
+	 * @param  Builder $query
+	 * @param  User $user
+	 * @return Builder
+	 */
+	public function scopeVisibleTo($query, $user)
 	{
-		$sizes = config('balldeep.image_sizes');
-
-		foreach( $sizes as $name => $size )
+		if( $user->isA('contributor') )
 		{
-			$this->addMediaConversion($name)
-				->performOnCollections('featured')
-				->width($size[0])
-				->height($size[1]);
+			return $query->where('user_id', $user->id);
 		}
+
+		return $query;
+	}
+
+	/**
+	 * Return models in alphabetical order
+	 * 
+	 * @param  Builder $query
+	 * @return Builder
+	 */
+	public function scopeAlphabetical($query)
+	{
+		return $query->orderBy('name');
+	}
+
+	/**
+	 * Return re-orderable models in order
+	 * 
+	 * @param  Builder $query
+	 * @return Builder
+	 */
+	public function scopeInOrder($query)
+	{
+		return $query->orderBy('order');
+	}
+
+	/**
+	 * Return models which are not equal to the given ID
+	 * 
+	 * @param  Builder $query
+	 * @param  integer $id
+	 * @return Builder
+	 */
+	public function scopeNot($query, $id)
+	{
+		if( ! $id ) return $query;
+		
+		return $query->where('id', '!=', $id);
 	}
 
 }

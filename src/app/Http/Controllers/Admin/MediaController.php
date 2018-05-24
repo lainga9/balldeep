@@ -24,6 +24,8 @@ class MediaController extends Controller {
 
 	public function delete(Media $media)
 	{
+		$media->model()->delete();
+
 		$media->delete();
 
 		return redirect()->back()->with('success', 'Media successfully deleted');

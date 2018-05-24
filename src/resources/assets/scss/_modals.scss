@@ -1,0 +1,16 @@
+.modal {
+
+	&--full {
+
+		.modal-dialog {
+			max-width: 95%;
+		}
+	}
+
+	&--padded {
+
+		.modal-body {
+			padding: 30px;
+		}
+	}
+}

@@ -23,10 +23,19 @@ class StorePostRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'name'      => 'required',
-            'excerpt'   => 'nullable|max:255',
-            'content'   => 'required'
+            'excerpt'   => 'nullable|max:255'
         ];
+
+        // if( count($meta = $this->get('meta')) )
+        // {
+        //     foreach( $meta as $key => $value )
+        //     {
+        //         $rules[$key] = 'required';
+        //     }
+        // }
+
+        return $rules;
     }
 }

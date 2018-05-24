@@ -18,6 +18,7 @@ class CreatePostTypesTable extends Migration
             $table->increments('id');
             $table->string('slug');
             $table->string('name');
+            $table->boolean('hierarchical')->default(0);
             $table->timestamps();
         });
     }

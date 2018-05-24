@@ -1,5 +1,7 @@
 @extends('balldeep::layout')
 
+@section('title', 'Edit Taxonomy')
+
 @section('content')
 
 	<form action="{!! route('balldeep.admin.taxonomies.update', $taxonomy) !!}" method="POST">

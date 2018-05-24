@@ -1,5 +1,7 @@
 @extends('balldeep::layout')
 
+@section('title', 'Menus')
+
 @section('content')
 
 	@if( $menus->isNotEmpty() )
@@ -19,7 +21,7 @@
 							<form action="{!! route('balldeep.admin.menu.delete', $menu) !!}" method="POST">
 								{!! csrf_field() !!}
 								<input type="hidden" name="_method" value="DELETE">
-								<button type="submit" class="btn btn-danger">Delete</button>
+								<button type="submit" class="btn btn-plain text-danger"><i class="fa fa-trash"></i></button>
 							</form>
 						</td>
 					</tr>

@@ -8,17 +8,15 @@
     {{-- Encrypted CSRF token for Laravel, in order for Ajax requests to work --}}
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <title>
-      {{ isset($title) ? $title.' :: '.config('backpack.base.project_name').' Admin' : config('backpack.base.project_name').' Admin' }}
-    </title>
+    <title>{!! config('app.name') !!} | @yield('title')</title>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
     @yield('before_styles')
 
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{!! asset('vendor/balldeep/app.css') !!}">
 
     @yield('after_styles')
 
@@ -29,28 +27,31 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body>
+<body class="bd-app">
 
-	<div class="container pt-4">
-		@include('balldeep::_partials.errors')
-		@include('balldeep::_partials.messages')
+    @include('balldeep::_partials.layout.header')
 
-        <div class="mb-3">
-            <a href="{!! route('balldeep.admin.menu.index') !!}">Menus</a>
-            <a href="{!! route('balldeep.admin.media.index') !!}">Media</a>
+    <div class="bd-container">
 
-            @foreach( Lainga9\BallDeep\app\PostType::all() as $type )
+        @include('balldeep::_partials.layout.sidebar')
 
-                <a href="{!! route('balldeep.admin.posts.index', $type->slug) !!}">{!! str_plural($type->name) !!}</a>
+        <div class="bd-content">
 
-            @endforeach
+            <h2 class="bd-content__title">@yield('title')</h2>
+
+            @include('balldeep::_partials.errors')
+            @include('balldeep::_partials.messages')
+            
+            @yield('content')
+            
         </div>
-
-		@yield('content')
-	</div>
+        
+    </div>
 
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
 	<script src="{!! asset('vendor/balldeep/app.js') !!}?ver={!! time() !!}"></script>
+
+    @yield('scripts')
 </body>
 </html>

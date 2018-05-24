@@ -1,3 +1,36 @@
+## General
+
+add
+
+`"lainga9/balldeep": "dev-master"`
+
+to composer.json and update
+
+then
+
+```
+php artisan package:discover
+
+php artisan vendor:publish --provider="Lainga9\BallDeep\BallDeepServiceProvider" --force
+
+php artisan vendor:publish --tag="bouncer.migrations"
+
+php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="migrations"
+
+php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="config"
+
+php artisan migrate
+
+composer dump-auto
+
+php artisan db:seed --class="BdPostTypesTableSeeder"
+
+php artisan db:seed --class="BdRolesTableSeeder"
+
+php artisan storage:link
+
+```
+
 ## User Management
 
 
@@ -11,8 +44,6 @@ Add to User model
 ```
 use Silber\Bouncer\Database\HasRolesAndAbilities;
 ```
-
-`php artisan vendor:publish --tag="bouncer.migrations"`
 
 ## Sitemaps
 
@@ -44,22 +75,11 @@ An updated_at timestamp column in the model's table is also required.
 
 https://github.com/spatie/laravel-medialibrary
 
-```php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="migrations"```
-
-```php artisan migrate```
-
-```php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="config"```
-
 
 ## Menu Manager
 
-https://github.com/taye/interact.js
-
-`sudo npm install interactjs --save`
 
 ## Content Manager
-
-`php artisan db:seed --class="BdPostTypesTableSeeder";`
 
 Comes with default post types: page and post
 

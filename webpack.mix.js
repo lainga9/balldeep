@@ -11,7 +11,9 @@ let mix = require('laravel-mix');
  |
  */
 
-mix.js('src/resources/assets/js/app.js', 'src/dist/').sass('src/resources/assets/scss/app.scss', 'src/dist/');
+mix.js('src/resources/assets/js/app.js', 'src/dist/')
+	.sass('src/resources/assets/scss/app.scss', 'src/dist/')
+	.copy('node_modules/trumbowyg/dist/ui/icons.svg', 'src/dist/icons.svg');
 
 // Full API
 // mix.js(src, output);

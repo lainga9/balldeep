@@ -1,0 +1,46 @@
+html {
+	height: 100%;
+}
+
+.bd-app {
+	height: 100%;
+	padding-left: $sidebar-width;
+	-webkit-font-smoothing: antialiased;
+	font-size: 16px;
+	font-family: $font-primary;
+	color: $font-primary-color;
+}
+
+img {
+	@extend .img-fluid;
+}
+
+[data-sortable] {
+	cursor: move;
+}
+
+[data-select-media] {
+	cursor: pointer;
+}
+
+a {
+	color: $primary;
+	text-decoration: none;
+
+	&:hover,
+	&:focus {
+		color: $primary;
+	}
+}
+
+.trumbowyg-box {
+	margin: 0 auto;
+}
+
+.elem--bordered {
+	border: 1px solid $lighter-grey;
+}
+
+.elem--shadow {
+	box-shadow: 1px 1px 3px rgba(0,0,0,.05);
+}

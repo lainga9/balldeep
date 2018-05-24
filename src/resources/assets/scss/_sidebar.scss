@@ -1,0 +1,42 @@
+.bd-sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	height: 100%;
+	overflow-y: scroll;
+	padding: 30px;
+	width: $sidebar-width;
+	background: $sidebar-bg-color;
+	color: $sidebar-font-color;
+	border-right: 1px solid darken($sidebar-bg-color, 7%);
+	box-shadow: 2px 0 20px 3px rgba(0,0,0,.1);
+
+	&__nav {
+		margin: -15px -30px 30px;
+
+		&-menu {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		&-link {
+			color: $sidebar-font-color;
+			display: block;
+			border-bottom: 1px solid darken($sidebar-bg-color, 7%);
+			padding: 15px 20px;
+
+			&:hover,
+			&:focus {
+				color: $sidebar-font-color;
+			}
+		}
+
+		&-icon {
+			font-size: 0.8rem;
+			width: 20px;
+			text-align: center;
+		}
+	}
+}

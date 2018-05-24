@@ -62,7 +62,23 @@ class Post extends Model {
 	 */
 	public function type()
 	{
-		return $this->belongsTo('Lainga9\BallDeep\app\PostType', 'post_type_id');
+		return $this->belongsTo(
+			'Lainga9\BallDeep\app\PostType',
+			'post_type_id'
+		);
+	}
+
+	/**
+	 * Return any children of the post
+	 * 
+	 * @return HasMany
+	 */
+	public function children()
+	{
+		return $this->hasMany(
+			'Lainga9\BallDeep\app\Post',
+			'post_parent_id'
+		);
 	}
 
 	/**
@@ -76,6 +92,69 @@ class Post extends Model {
 			'Lainga9\BallDeep\app\Taxonomy',
 			'bd_post_taxonomy'
 		);
+	}
+
+	/**
+	 * The media item attached to the post
+	 * 
+	 * @return Media
+	 */
+	public function media()
+	{
+		return $this->belongsTo(
+			'Lainga9\BallDeep\app\Media',
+			'media_id'
+		);
+	}
+
+	/**
+	 * Return all of the related post meta.
+	 * Note: using plural form so we can use
+	 * the singular as a getter method
+	 * 
+	 * @return HasMany
+	 */
+	public function metas()
+	{
+		return $this->hasMany(
+			'Lainga9\BallDeep\app\PostMeta',
+			'post_id'
+		);
+	}
+
+	/**
+	 * Any menu items which are linking to this page
+	 * 
+	 * @return HasMany
+	 */
+	public function menuItems()
+	{
+		return $this->hasMany(
+			'Lainga9\BallDeep\app\MenuItem',
+			'post_id'
+		);
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Scopes
+	|--------------------------------------------------------------------------
+	|
+	*/
+
+	public function scopeTopLevel($query)
+	{
+		return $query->where('post_parent_id', 0);
+	}
+
+	public function scopeTaxonomy($query, $taxonomyId = null)
+	{
+		if( ! $taxonomyId ) return $query;
+
+		return $query->whereHas('taxonomies', function($sub) use ($taxonomyId)
+		{
+			$sub->where('bd_taxonomies.id', $taxonomyId);
+		});
 	}
 
 	/*
@@ -126,6 +205,19 @@ class Post extends Model {
 	}
 
 	/**
+	 * Return value of post meta attached to post
+	 * 
+	 * @param  string $key
+	 * @return string
+	 */
+	public function meta($key)
+	{
+		$meta = $this->metas()->where('key', $key)->first();
+
+		return $meta ? $meta->value() : '';
+	}
+
+	/**
 	 * Return the date at which the post was published
 	 * 
 	 * @param  string $format
@@ -155,6 +247,28 @@ class Post extends Model {
 	public function getSitemapUrl()
 	{
 		return $this->url();
+	}
+
+	/**
+	 * Return the SEO title if specified
+	 * 
+	 * @return string
+	 */
+	public function metaTitle()
+	{
+		return $this->meta('seo_title') ?: $this->title();
+	}
+
+	/**
+	 * Return the SEO description if specified
+	 * 
+	 * @return string
+	 */
+	public function metaDescription($length = 230)
+	{
+		$description = $this->meta('seo_description') ?: $this->excerpt();
+
+		return BallDeep::trimString($description);
 	}
 
 	/*

@@ -5,15 +5,19 @@ namespace Lainga9\BallDeep\app\Http\Controllers\Admin;
 use Lainga9\BallDeep\app\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Lainga9\BallDeep\app\Menu;
+use Lainga9\BallDeep\app\PostType;
 use Lainga9\BallDeep\app\Http\Requests\StoreMenuRequest;
 
 class MenuController extends Controller {
 
 	protected $menu;
 
-	public function __construct(Menu $menu)
+	protected $type;
+
+	public function __construct(Menu $menu, PostType $type)
 	{
 		$this->menu = $menu;
+		$this->type = $type;
 	}
 
 	public function index()
@@ -37,7 +41,9 @@ class MenuController extends Controller {
 
 	public function manage(Menu $menu)
 	{
-		return view('balldeep::admin.menu.manage', compact('menu'));
+		$types = $this->type->alphabetical()->get();
+
+		return view('balldeep::admin.menu.manage', compact('menu', 'types'));
 	}
 
 	public function reorder(Menu $menu, Request $request)
@@ -46,8 +52,13 @@ class MenuController extends Controller {
 		{
 			$model = $menu->items()->find($item->id);
 
-			$model->update(['order' => $item->order]);
+			$model->update([
+				'order' => $item->order,
+				'parent'=> $item->parent
+			]);
 		}
+
+		return response()->json(['items' => $menu->items]);
 	}	
 
 	public function delete(Menu $menu)

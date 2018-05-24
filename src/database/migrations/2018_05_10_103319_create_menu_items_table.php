@@ -16,11 +16,12 @@ class CreateMenuItemsTable extends Migration
         Schema::create('bd_menu_items', function (Blueprint $table)
         {
             $table->increments('id');
-            $table->string('label');
-            $table->string('url');
+            $table->string('label')->nullable();
+            $table->string('url')->nullable();
             $table->integer('order');
             $table->integer('parent')->default(0);
-            $table->integer('bd_menu_id')->index();
+            $table->integer('post_id')->index()->nullable();
+            $table->integer('menu_id')->index();
             $table->timestamps();
         });
     }

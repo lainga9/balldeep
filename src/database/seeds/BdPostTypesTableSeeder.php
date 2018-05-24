@@ -12,11 +12,21 @@ class BdPostTypesTableSeeder extends Seeder
      */
     public function run()
     {
-        $types = ['Post', 'Page'];
+        $types = [
+            [
+                'name' => 'Post'
+            ],
+            [
+                'name' => 'Page',
+                'hierarchical' => 1
+            ]
+        ];
 
-        foreach( $types as $name )
+        foreach( $types as $array )
         {
-            PostType::firstOrCreate(compact('name'));
+            $type = PostType::firstOrCreate(['name' => $array['name']]);
+
+            $type->update($array);
         }
     }
 }

@@ -6,9 +6,11 @@ use Lainga9\BallDeep\app\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Lainga9\BallDeep\app\Post;
 use Lainga9\BallDeep\app\PostType;
+use Lainga9\BallDeep\app\Fields\MetaBoxes;
 use Lainga9\BallDeep\app\Http\Requests\StorePostRequest;
 use Lainga9\BallDeep\app\Repositories\UploadsRepository;
 use Storage;
+use Spatie\MediaLibrary\Models\Media;
 
 class PostsController extends Controller {
 
@@ -34,57 +36,80 @@ class PostsController extends Controller {
 	protected $uploads;
 
 	/**
+	 * Instance of Media model
+	 * 
+	 * @var Media
+	 */
+	protected $media;
+
+	/**
 	 * Constructor method
 	 * 
 	 * @param Post     $post
 	 * @param PostType $type
 	 * @param UploadsRepository $uploads
 	 */
-	public function __construct(Post $post, PostType $type, UploadsRepository $uploads)
+	public function __construct(Post $post, PostType $type, UploadsRepository $uploads, Media $media)
 	{
 		$this->post = $post;
 		$this->type = $type;
 		$this->uploads = $uploads;
+		$this->media = $media;
 	}
 	
-	public function index($typeSlug)
+	public function index(PostType $postType, Request $request)
 	{
-		$type = $this->type->findBySlug($typeSlug);
+		$posts = $postType->posts()
+					->topLevel()
+					->taxonomy($request->get('taxonomy'))
+					->visibleTo($request->user())
+					->latest()
+					->get();
 
-		if( ! $type ) abort(404);
-
-		$posts = $type->posts()->latest()->get();
-
-		return view('balldeep::admin.posts.index', compact('posts', 'type'));
+		return view('balldeep::admin.posts.index', compact('posts') + ['type' => $postType]);
 	}
 
-	public function create($typeSlug)
+	public function create(PostType $postType)
 	{
-		$type = $this->type->findBySlug($typeSlug);
-
-		if( ! $type ) abort(404);
-
-		return view('balldeep::admin.posts.create', compact('type'));
+		return view('balldeep::admin.posts.create', ['type' => $postType] + compact('metaBoxes'));
 	}
 
 	public function store(PostType $postType, StorePostRequest $request)
 	{
-		$post = $postType->posts()->create($request->except('taxonomies', 'image', 'image_remove'));
+		$post = $postType->posts()->create($request->except([
+			'taxonomies',
+			'image',
+			'image_remove',
+			'meta'
+		]));
 
-		if( $request->hasFile('image') )
+		if( ! $request->get('media_id') && $request->hasFile('image') )
 		{
 			$path = $this->uploads->uploadFile($request->file('image'));
 
-			$post->clearMediaCollection('featured');
+			$media = $post->media()->create([]);
 
-			$post->addMedia(storage_path('app/public/'.$path))
+			$media->addMedia(storage_path('app/public/'.$path))
 				->withResponsiveImages()
 				->toMediaCollection('featured');
+
+			$post->update(['media_id' => $media->id]);
 		}
 
 		$post->taxonomies()->attach($request->get('taxonomies'));
 
-		return redirect()->route('balldeep.admin.posts.edit', $post)->with('success', 'Post successfully added!');
+		if( count($request->get('meta')) )
+		{
+			foreach( $request->get('meta') as $key => $value )
+			{
+				if( $value )
+				{
+					$post->metas()->create(compact('key', 'value'));
+				}
+			}
+		}
+
+		return redirect()->route('balldeep.admin.posts.edit', $post)->with('success', sprintf('%s successfully added!', ucwords($post->type->name)));
 	}
 
 	public function edit(Post $post)
@@ -94,32 +119,55 @@ class PostsController extends Controller {
 
 	public function update(Post $post, StorePostRequest $request)
 	{
-		$post->update($request->except(['taxonomies', 'image', 'image_remove']));
+		$post->update($request->except([
+			'taxonomies',
+			'image',
+			'image_remove',
+			'meta'
+		]));
 
-		if( $request->hasFile('image') )
+		if( ! $request->get('media_id') && $request->hasFile('image') )
 		{
 			$path = $this->uploads->uploadFile($request->file('image'));
 
-			$post->clearMediaCollection('featured');
+			$media = $post->media()->create([]);
 
-			$post->addMedia(storage_path('app/public/'.$path))
+			$media->addMedia(storage_path('app/public/'.$path))
 				->withResponsiveImages()
 				->toMediaCollection('featured');
+
+			$post->update(['media_id' => $media->id]);
 		}
 
-		if( $request->has('image_remove') ) $post->clearMediaCollection('featured');
+		if( $request->has('image_remove') )
+		{
+			$post->media->delete();
+		}
+
+		if( count($request->get('meta')) )
+		{
+			foreach( $request->get('meta') as $key => $value )
+			{
+				if( $value )
+				{
+					$post->metas()->create(compact('key', 'value'));
+				}
+			}
+		}
 
 		$post->taxonomies()->sync($request->get('taxonomies'));
 
-		return redirect()->route('balldeep.admin.posts.edit', $post)->with('success', 'Post successfully updated!');
+		return redirect()->route('balldeep.admin.posts.edit', $post)->with('success', sprintf('%s successfully updated!', ucwords($post->type->name)));
 	}
 
 	public function delete(Post $post)
 	{
 		$type = $post->type;
 
+		$post->menuItems()->delete();
+
 		$post->delete();
 
-		return redirect()->route('balldeep.admin.posts.index', $type->slug)->with('success', 'Post successfully deleted');
+		return redirect()->route('balldeep.admin.posts.index', $type)->with('success', sprintf('%s successfully deleted!', ucwords($post->type->name)));
 	}
 }

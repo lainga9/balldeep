@@ -36,24 +36,17 @@ class TaxonomiesController extends Controller {
 		$this->type = $type;
 	}
 	
-	public function index($typeSlug)
+	public function index(PostType $postType)
 	{
-		$type = $this->type->findBySlug($typeSlug);
+		$taxonomies = $postType->taxonomies()->latest()->get();
 
-		if( ! $type ) abort(404);
-
-		$taxonomies = $type->taxonomies()->latest()->get();
-
-		return view('balldeep::admin.taxonomies.index', compact('taxonomies', 'type'));
+		return view('balldeep::admin.taxonomies.index', compact('taxonomies') + ['type' => $postType]);
 	}
 
-	public function create($typeSlug)
+	public function create(PostType $postType)
 	{
-		$type = $this->type->findBySlug($typeSlug);
 
-		if( ! $type ) abort(404);
-
-		return view('balldeep::admin.taxonomies.create', compact('type'));
+		return view('balldeep::admin.taxonomies.create', ['type' => $postType]);
 	}
 
 	public function store(PostType $postType, StoreTaxonomyRequest $request)
@@ -65,7 +58,7 @@ class TaxonomiesController extends Controller {
 			return response()->json(compact('taxonomy'));
 		}
 
-		return redirect()->route('balldeep.admin.taxonomies.edit', $taxonomy)->with('success', 'Taxonomy successfully added!');
+		return redirect()->route('balldeep.admin.taxonomies.index', $postType)->with('success', 'Taxonomy successfully added!');
 	}
 
 	public function edit(Taxonomy $taxonomy)

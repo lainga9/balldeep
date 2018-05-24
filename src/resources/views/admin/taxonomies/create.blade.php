@@ -1,5 +1,7 @@
 @extends('balldeep::layout')
 
+@section('title', sprintf('Add %s Taxonomy', ucwords($type->name)))
+
 @section('content')
 
 	<form action="{!! route('balldeep.admin.taxonomies.store', $type) !!}" method="POST">

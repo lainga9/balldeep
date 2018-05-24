@@ -2,7 +2,6 @@
 
 namespace Lainga9\BallDeep\app;
 
-use Illuminate\Database\Eloquent\Model;
 use Lainga9\BallDeep\app\Traits\Sluggable;
 
 class PostType extends Model {
@@ -55,5 +54,15 @@ class PostType extends Model {
 	public function taxonomies()
 	{
 		return $this->hasMany('Lainga9\BallDeep\app\Taxonomy');
+	}
+
+	/**
+	 * Any meta groups which should display for this post type
+	 * 
+	 * @return BelongsToMany
+	 */
+	public function metaGroups()
+	{
+		return $this->belongsToMany('Lainga9\BallDeep\app\MetaGroup', 'bd_meta_group_post_type', 'post_type_id', 'meta_group_id');
 	}
 }

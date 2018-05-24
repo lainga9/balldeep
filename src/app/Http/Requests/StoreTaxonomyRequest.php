@@ -13,7 +13,7 @@ class StoreTaxonomyRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return ! is_null($this->user()) && $this->user()->isAn('admin');
     }
 
     /**

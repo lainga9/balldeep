@@ -1,8 +1,107 @@
 window.$ = window.jQuery = require('jquery');
 
 require('./jquery-ui.min');
+require('trumbowyg');
+window.Tether = require('tether');
+require('bootstrap');
 
 jQuery(document).ready(function($) {
+
+	$(document).on('click', '[data-toggle="collapse"]', function(e) {
+		e.preventDefault();
+		$(this).collapse();
+	});
+
+	$.trumbowyg.svgPath = '/vendor/balldeep/icons.svg';
+
+	/*
+	 * Submit forms without using submit button
+	 */
+	$(document).on('change', '[data-submit-on-change]', function() {
+		var $form = $(this).closest('form');
+		if( $form.length > 0 ) {
+			$form.submit();
+		}
+	});
+
+	/*
+	 * WYSIWYG editors
+	 */
+	$('[data-trumbo]').each(function() {
+		var $this = $(this);
+		var $config = {};
+		if( typeof $this.data('trumbo-config') === 'undefined' ) {
+			var $buttons = [
+				['undo', 'redo'], 
+				['formatting'],
+				['strong', 'em', 'del'],
+				['superscript', 'subscript'],
+				['link'],
+				['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+				['unorderedList', 'orderedList'],
+				['horizontalRule'],
+				['removeformat'],
+				['fullscreen']
+			];
+		} else {
+			$config = $this.data('trumbo-config');
+		}
+		$this.trumbowyg($config);
+	});
+
+	/*
+	 * Select media from popup gallery
+	 */
+	$(document).on('click', '[data-select-media]', function(e) {
+		var $this = $(this);
+		var $name = $this.data('select-media');
+		var $imageTarget = $('[data-upload-image="' + $name + '"]');
+		if( $imageTarget.length > 0 ) {
+			$imageTarget.prop('src', $this.data('media-src'));
+			var $form = $imageTarget.closest('form');
+			if( $form.length > 0 ) {
+				var $input = $form.find('input[name="media_id"]');
+				if( $input.length > 0 ) {
+					$input.val($this.data('media-id'));
+				} else {
+					$form.prepend(
+						$('<input>')
+							.prop('type', 'hidden')
+							.prop('name', 'media_id')
+							.val($this.data('media-id'))
+					)
+				}
+			}
+		}
+		if( $this.closest('.modal').length > 0 ) {
+			$this.closest('.modal').first().modal('hide');
+		}
+	});
+
+	/*
+	 * Load HTML via ajax and inject it into specifed
+	 * container in DOM
+	 */
+	$(document).on('click', '[data-load-html]', function(e) {
+		e.preventDefault();
+		var $this = $(this);
+		var $container = $($this.data('html-container'));
+		if( $container.length > 0 ) {
+			$.ajax({
+				type: "GET",
+				url: $this.data('load-html'),
+				success: function(response) {
+					if( $container.closest('.modal').length > 0 ) {
+						$container.closest('.modal').first().modal('show');
+					}
+					$container.html(response.html);
+				},
+				error: function(response) {
+					console.error('response');
+				}
+			});
+		}
+	});
 
 	/**
 	 * Handle image uploads
@@ -96,6 +195,9 @@ jQuery(document).ready(function($) {
 									.prop('for', 'tax-' + response.taxonomy.id)
 									.text(response.taxonomy.name);
 					$('[data-list-taxonomies]').append($li.append($input).append($label));
+					if( $modal.length > 0 ) {
+						$modal.modal('hide');
+					}
 				}
 			},
 			error: function(response) {
@@ -120,12 +222,70 @@ jQuery(document).ready(function($) {
 		var $this = $(this);
 		$this.sortable({
 			interactsWith: '.children',
-			update: function(e, ui) {
+			placeholder: 'placeholder',
+			sort: function(e, ui) {
+				var $pos = ui.position.left;
+				if( ui.helper.hasClass('sortable-nested') ) {
+					$pos = ui.position.left + 40;
+				}
+				if( $pos > 40 ) {
+					ui.placeholder.addClass('sortable-nested');
+					ui.helper.addClass('sortable-nested');
+				} else {
+					ui.placeholder.removeClass('sortable-nested');
+					ui.helper.removeClass('sortable-nested');
+				}
+			},
+			stop: function(e, ui) {
+				var $children = $this.children();
+
+				// Don't allow first item to be indented
+				$children.first().removeClass('sortable-nested');
+
+				// Container for our item data which will be
+				// passed via ajax request
 				var $items = [];
-				$this.find('li').each(function() {
+
+				$children.each(function() {
+
+					// Assume it has no parent
+					var $parent = 0;
+
+					// Get index of element in list
+					var $index = $(this).index();
+
+					// If it's not the top item and it has
+					// been nested then we need to find out
+					// which elem is it's parent. Since we
+					// only allow nesting one deep we need
+					// to make sure to find the closest
+					// parent which is not nested
+					if( $index > 0 && $(this).hasClass('sortable-nested') ) {
+
+						var $parentElem;
+
+						// Get all of the elements above
+						// the given item
+						var $elemsAbove = $children.slice(0, $index);
+
+						// Loop through elems and if they have
+						// not been nested updated $parentElem
+						// element. Because we are looping
+						// through them in order the closest
+						// one to given item will be the result
+						$elemsAbove.each(function() {
+							if( ! $(this).hasClass('sortable-nested') ) {
+								$parentElem = $(this);
+							}
+						});
+						if( typeof $parentElem !== 'undefined' ) {
+							$parent = $parentElem.data('id');
+						}
+					}
 					$items.push({
 						id: $(this).data('id'),
-						order: $(this).index() + 1
+						order: $(this).index() + 1,
+						parent: $parent
 					});
 				});
 				var $data = {
@@ -143,6 +303,9 @@ jQuery(document).ready(function($) {
 						console.error(response);
 					}
 				});
+			},
+			update: function(e, ui) {
+
 			}
 		});
 	});

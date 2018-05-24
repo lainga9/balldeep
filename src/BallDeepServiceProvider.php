@@ -3,6 +3,7 @@
 namespace Lainga9\BallDeep;
 
 use Illuminate\Support\ServiceProvider;
+use Lainga9\BallDeep\app\BallDeep;
 
 /**
  * A Laravel 5.5 package boilerplate
@@ -28,6 +29,8 @@ class BallDeepServiceProvider extends ServiceProvider {
      */
     protected $commands = [
         app\Commands\GenerateSitemapCommand::class,
+        app\Commands\SetupCommand::class,
+        app\Commands\GeneratePostTypeCommand::class
     ];
 
     /**
@@ -44,12 +47,6 @@ class BallDeepServiceProvider extends ServiceProvider {
 
         // // Regiter migrations
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
-
-        // // Register translations
-        // $this->loadTranslationsFrom(__DIR__.'/../lang', $this->packageName);
-        // $this->publishes([
-        //     __DIR__.'/../lang' => resource_path('lang/vendor/'. $this->packageName),
-        // ]);
 
         // // Register your asset's publisher
         $this->publishes([
@@ -87,6 +84,16 @@ class BallDeepServiceProvider extends ServiceProvider {
             __DIR__.'/config/config.php', $this->packageName
         );
 
+        $this->app
+            ->make('view')
+            ->composer([
+                'balldeep::_partials.media-gallery',
+            ], 'Lainga9\BallDeep\app\Composers\MediaGalleryViewComposer');
+
+        $this->app->bind('BallDeep', function()
+        {
+            return new BallDeep;
+        });
     }
 
 }

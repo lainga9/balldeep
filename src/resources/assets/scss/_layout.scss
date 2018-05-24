@@ -1,0 +1,25 @@
+.bd-app {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	height: 100%;
+}
+
+.bd-container {
+	display: flex;
+	align-items: stretch;
+	justify-content: flex-start;
+	height: 100%;
+}
+
+.bd-content {
+	// width: calc(100% - #{$sidebar-width});
+	width: 100%;
+	padding: 40px 50px;
+
+	&__title {
+		padding-bottom: 15px;
+		border-bottom: 1px solid #e3e3e3;
+		margin: 0 0 40px;
+	}
+}

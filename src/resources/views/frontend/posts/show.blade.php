@@ -12,7 +12,7 @@
 		</ul>
 	@endif
 
-	@if( $item = $post->getFirstMedia('featured') )
+	@if( $post->media && ($item = $post->media->getFirstMedia('featured')) )
 
 		{!! $item->toHtml() !!}
 
@@ -23,5 +23,7 @@
 	<hr>
 
 	{!! $post->content() !!}
+
+	<p><strong>Stadium: </strong>{!! $post->meta('stadium') !!}</p>
 
 @stop

@@ -33,12 +33,28 @@ class Menu extends Model {
 	*/
 
 	/**
-	 * The items which are in the menu
+	 * All items which are in the menu including posts and custom
 	 * 
 	 * @return HasMany
 	 */
 	public function items()
 	{
-		return $this->hasMany('Lainga9\BallDeep\app\MenuItem', 'bd_menu_id');
+		return $this->hasMany('Lainga9\BallDeep\app\MenuItem');
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters & Setters
+	|--------------------------------------------------------------------------
+	|
+	*/
+
+	public static function html($name)
+	{
+		$menu = static::where('name', $name)->first();
+
+		if( ! $menu ) return '';
+
+		return view('balldeep::frontend._partials.menus', $name)->render();
 	}
 }
