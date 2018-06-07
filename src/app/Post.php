@@ -3,6 +3,7 @@
 namespace Lainga9\BallDeep\app;
 
 use Lainga9\BallDeep\app\Traits\Sluggable;
+use Auth;
 
 class Post extends Model {
 
@@ -40,6 +41,17 @@ class Post extends Model {
 	{
 		parent::boot();
 
+		static::updating(function($post)
+		{
+			if( $post->isDirty('content') )
+			{
+				$post->revisions()->create([
+					'content' => $post->getOriginal('content'),
+					'user_id' => Auth::user()->id
+				]);
+			}
+		});
+
 		static::creating(function($post)
 		{
 			$post->excerpt = property_exists($post, 'excerpt') ?
@@ -54,6 +66,19 @@ class Post extends Model {
 	|--------------------------------------------------------------------------
 	|
 	*/
+
+	/**
+	 * The user who created the post
+	 * 
+	 * @return Post
+	 */
+	public function post()
+	{
+		return $this->belongsTo(
+			'Lainga9\BallDeep\app\Post',
+			'user_id'
+		);
+	}
 
 	/**
 	 * The type of the post
@@ -82,6 +107,19 @@ class Post extends Model {
 	}
 
 	/**
+	 * Return any revisions of the post
+	 * 
+	 * @return HasMany
+	 */
+	public function revisions()
+	{
+		return $this->hasMany(
+			'Lainga9\BallDeep\app\PostRevision',
+			'post_id'
+		)->latest();
+	}
+
+	/**
 	 * The taxonomies to which the post belongs
 	 * 
 	 * @return BelongsToMany
@@ -90,7 +128,9 @@ class Post extends Model {
 	{
 		return $this->belongsToMany(
 			'Lainga9\BallDeep\app\Taxonomy',
-			'bd_post_taxonomy'
+			'bd_post_taxonomy',
+			'post_id',
+			'taxonomy_id'
 		);
 	}
 
@@ -201,7 +241,56 @@ class Post extends Model {
 	 */
 	public function content()
 	{
-		return $this->content;
+		$content = $this->content;
+
+		$codes = preg_match_all('#({(?>[^{}]|(?0))*?})#', $content, $matches);
+
+		if( ! count($matches) ) return $this->content;
+
+		$matches = array_unique(array_flatten($matches));
+
+		foreach( $matches as $match )
+		{
+			$toReplace = $match;
+
+			$match = str_replace(['{', '}'], '', $match);
+
+			$components = explode(' ', $match);
+
+			$model = sprintf('Lainga9\\BallDeep\\app\\%s', $modelName = ucwords(array_shift($components)));
+
+			if( ! class_exists($model) ) continue;
+
+			if( ! count($components) ) continue;
+
+			foreach( $components as $component )
+			{
+				$pieces = explode(':', $component);
+
+				$params[$pieces[0]] = $pieces[1];
+			}
+
+			if( ! array_key_exists('id', $params) ) continue;
+
+			$title =array_key_exists('title', $params) ? $params['title'] : null;
+
+			$title = $title !== 'false' ? true : false;
+
+			$model = $model::find($id = $params['id']);
+
+			if( ! $model )
+			{
+				$replace = sprintf('%s with ID %d not found!', $modelName, $id);
+			}
+			else
+			{
+				$replace = $model->display($title);
+			}
+
+			$content = str_replace($toReplace, $replace, $content);
+		}
+
+		return $content;
 	}
 
 	/**
@@ -256,7 +345,7 @@ class Post extends Model {
 	 */
 	public function metaTitle()
 	{
-		return $this->meta('seo_title') ?: $this->title();
+		return $this->meta('meta_title') ?: $this->title();
 	}
 
 	/**
@@ -266,9 +355,88 @@ class Post extends Model {
 	 */
 	public function metaDescription($length = 230)
 	{
-		$description = $this->meta('seo_description') ?: $this->excerpt();
+		$description = $this->meta('meta_description') ?: $this->excerpt();
 
 		return BallDeep::trimString($description);
+	}
+
+	/**
+	 * Return the social title if specified
+	 * 
+	 * @return string
+	 */
+	public function socialTitle()
+	{
+		return $this->meta('social_title') ?: $this->metaTitle();
+	}
+
+	/**
+	 * Return the social description if specified
+	 * 
+	 * @return string
+	 */
+	public function socialDescription()
+	{
+		return $this->meta('social_description') ?: $this->metaDescription();
+	}
+
+	/**
+	 * Return OG facebook tags for <head>
+	 * 
+	 * @return string
+	 */
+	public function facebookMeta()
+	{
+		return BallDeep::getFacebookMetaTags(
+			$this->metaTitle(),
+			$this->url(),
+			$this->media ?
+				$this->media->getFirstMediaUrl() :
+				null,
+			$this->metaDescription()
+		);
+	}
+
+	/**
+	 * Return OG twitter tags for <head>
+	 * 
+	 * @return string
+	 */
+	public function twitterMeta()
+	{
+		return BallDeep::getTwitterMetaTags(
+			$this->metaTitle(),
+			$this->media ?
+				$this->media->getFirstMediaUrl() :
+				null,
+			$this->metaDescription()
+		);
+	}
+
+	/**
+	 * Return a template partials for the post
+	 * 
+	 * @param  string $type the name of the partial
+	 * @return string
+	 */
+	public function template($name)
+	{
+		if( view()->exists($path = sprintf('%s.%s', str_plural($this->type), $name)) )
+		{
+			$view = $path;
+		}
+		elseif( view()->exists($path = sprintf('posts.%s', $name)) )
+		{
+			$view = $path;
+		}
+		else
+		{
+			$view = sprintf('vendor.balldeep.posts.%s', $name);
+		}
+
+		if( ! view()->exists($view) ) return sprintf('View %s not found', $view);
+
+		return view($view)->with(['post' => $this, 'type' => $this->type])->render();
 	}
 
 	/*

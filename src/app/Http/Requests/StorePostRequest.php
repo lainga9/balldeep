@@ -3,6 +3,7 @@
 namespace Lainga9\BallDeep\app\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Auth;
 
 class StorePostRequest extends FormRequest
 {
@@ -13,7 +14,20 @@ class StorePostRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $user = Auth::guard('balldeep')->user();
+
+        /**
+         * When creating a post we have the post type
+         * as a route parameter. When updating a post
+         * though we have the post model
+         * 
+         * @var PostType
+         */
+        $type = $this->method() == 'POST' ? 
+                $this->route('postType') :
+                $this->route('post')->type;
+
+        return $user && $user->can('create', $type);
     }
 
     /**
@@ -27,14 +41,6 @@ class StorePostRequest extends FormRequest
             'name'      => 'required',
             'excerpt'   => 'nullable|max:255'
         ];
-
-        // if( count($meta = $this->get('meta')) )
-        // {
-        //     foreach( $meta as $key => $value )
-        //     {
-        //         $rules[$key] = 'required';
-        //     }
-        // }
 
         return $rules;
     }

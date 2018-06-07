@@ -65,4 +65,32 @@ class PostType extends Model {
 	{
 		return $this->belongsToMany('Lainga9\BallDeep\app\MetaGroup', 'bd_meta_group_post_type', 'post_type_id', 'meta_group_id');
 	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters & Setters
+	|--------------------------------------------------------------------------
+	|
+	*/
+
+	/**
+	 * Return the number of posts which should be displayed
+	 * per page on the index view. Can be set in config or 
+	 * if not then defaults to 9
+	 * 
+	 * @return integer
+	 */
+	public function postsPerPage()
+	{
+		$config = config('balldeep.posts_per_page');
+
+		$postsPerPage = 9;
+
+		if( is_array($config) && array_key_exists($this->slug, $config) )
+		{
+			$postsPerPage = $config[$this->slug] ?: $postsPerPage;
+		}
+
+		return $postsPerPage;
+	}
 }

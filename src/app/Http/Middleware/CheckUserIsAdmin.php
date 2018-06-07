@@ -4,6 +4,7 @@ namespace Lainga9\BallDeep\app\Http\Middleware;
 
 use Illuminate\Auth\AuthenticationException;
 use Closure;
+use Auth;
 
 class CheckUserIsAdmin
 {
@@ -16,9 +17,9 @@ class CheckUserIsAdmin
      */
     public function handle($request, Closure $next)
     {
-        $user = $request->user();
+        $user = Auth::guard('balldeep')->user();
 
-        if( ! ( $user && $user->isAn('admin') ) ) throw new AuthenticationException;
+        if( ! ( $user && $user->isAn('admin') ) ) abort(403);
 
         return $next($request);
     }

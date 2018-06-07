@@ -17,7 +17,13 @@
 				@foreach( $groups as $group )
 					<tr>
 						<td><a href="{!! route('balldeep.admin.groups.edit', $group) !!}">{!! $group->name !!}</a></td>
-						<td></td>
+						<td>
+							<form action="{!! route('balldeep.admin.groups.delete', $group) !!}" method="POST" data-confirm="are ou sure you want to delete this group?">
+								{!! csrf_field() !!}
+								<input type="hidden" name="_method" value="DELETE">
+								<button type="submit" class="btn btn-plain text-danger"><i class="fa fa-trash"></i></button>
+							</form>
+						</td>
 					</tr>
 				@endforeach
 			</tbody>
@@ -30,6 +36,6 @@
 
 	@endif
 
-	<a href="{!! route('balldeep.admin.groups.create') !!}" class="btn btn-primary">Add Custom Field</a>
+	<a href="{!! route('balldeep.admin.groups.create') !!}" class="btn btn-primary">Add Group</a>
 
 @stop

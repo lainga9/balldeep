@@ -3,6 +3,9 @@
 namespace Lainga9\BallDeep\app\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
+use Auth;
 
 class StoreMetaGroupRequest extends FormRequest
 {
@@ -13,7 +16,7 @@ class StoreMetaGroupRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user();
+        return Auth::guard('balldeep')->user();
     }
 
     /**
@@ -23,11 +26,6 @@ class StoreMetaGroupRequest extends FormRequest
      */
     public function rules()
     {
-        $rules = [
-            'name'      => 'required',
-            'types'     => 'array|min:1'
-        ];
-
-        return $rules;
+        return [];
     }
 }

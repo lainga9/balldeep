@@ -28,7 +28,7 @@
 					<?php endif; ?>
 					name="abilities[]"
 				>
-				<label for="ability-{!! $ability->id !!}">{!! $ability->name !!}</label>
+				<label for="ability-{!! $ability->id !!}">{!! $ability->title !!}</label>
 			</div>
 
 		@endforeach

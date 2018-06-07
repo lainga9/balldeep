@@ -2,15 +2,14 @@
 
 namespace Lainga9\BallDeep\app\Fields;
 
-use Lainga9\BallDeep\app\MetaField;
+use Lainga9\BallDeep\app\Fields\FieldAttributes;
 
 class Textarea extends Field {
 
-	protected $field;
+	protected $attributes;
 
-	public function __construct(MetaField $field)
+	public function __construct(FieldAttributes $attributes)
 	{
-		parent::__construct($field);
+		parent::__construct($attributes);
 	}
-
 }

@@ -59,7 +59,7 @@ class MenuController extends Controller {
 		}
 
 		return response()->json(['items' => $menu->items]);
-	}	
+	}
 
 	public function delete(Menu $menu)
 	{

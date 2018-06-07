@@ -22,6 +22,11 @@ class MediaController extends Controller {
 		return view('balldeep::admin.media.index', compact('media'));
 	}
 
+	public function show(Media $media)
+	{
+		return view('balldeep::admin.media.show', compact('media'));
+	}
+
 	public function delete(Media $media)
 	{
 		$media->model()->delete();

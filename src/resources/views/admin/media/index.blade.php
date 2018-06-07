@@ -15,7 +15,7 @@
 					<article class="bd-media">
 
 						<div class="bd-media__canvas">
-							<a href="{!! $medium->getUrl() !!}">
+							<a href="{!! route('balldeep.admin.media.show', $medium) !!}">
 								<img src="{!! $src = $medium->getUrl('thumbnail') !!}" alt="" class="bd-media__thumb">
 							</a>
 						</div>

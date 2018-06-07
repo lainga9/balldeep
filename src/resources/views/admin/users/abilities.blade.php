@@ -2,7 +2,7 @@
 
 @section('content')
 
-	<h4>{!! $user->name !!}</h4>
+	<h4>{!! $user->name() !!}</h4>
 
 	@if( $user->getAbilities()->isNotEmpty() )
 	

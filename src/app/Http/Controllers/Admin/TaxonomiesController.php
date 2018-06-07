@@ -79,6 +79,6 @@ class TaxonomiesController extends Controller {
 
 		$taxonomy->delete();
 
-		return redirect()->route('balldeep.admin.posts.index', $type->slug)->with('success', 'Taxonomy successfully deleted');
+		return redirect()->route('balldeep.admin.posts.index', $type)->with('success', 'Taxonomy successfully deleted');
 	}
 }

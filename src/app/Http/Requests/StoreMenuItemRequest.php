@@ -3,6 +3,7 @@
 namespace Lainga9\BallDeep\app\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Auth;
 
 class StoreMenuItemRequest extends FormRequest
 {
@@ -13,7 +14,9 @@ class StoreMenuItemRequest extends FormRequest
      */
     public function authorize()
     {
-        return ! is_null($this->user()) && $this->user()->isAn('admin');
+        $user = Auth::guard('balldeep')->user();
+        
+        return ! is_null($user) && $user->isAn('admin');
     }
 
     /**

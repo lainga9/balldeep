@@ -1,12 +1,18 @@
 @extends('balldeep::layout')
 
+@section('title', 'Add a User')
+
 @section('content')
 
 	<form action="{!! route('balldeep.admin.users.store') !!}" method="POST">
 		{!! csrf_field() !!}
 		<div class="form-group">
-			<label for="name" class="form-label">Name</label>
-			<input type="text" id="name" name="name" class="form-control" value="{!! old('name') !!}">
+			<label for="first_name" class="form-label">First Name</label>
+			<input type="text" id="first_name" name="first_name" class="form-control" value="{!! old('first_name') !!}">
+		</div>
+		<div class="form-group">
+			<label for="last_name" class="form-label">Last Name</label>
+			<input type="text" id="last_name" name="last_name" class="form-control" value="{!! old('last_name') !!}">
 		</div>
 		<div class="form-group">
 			<label for="email" class="form-label">Email</label>

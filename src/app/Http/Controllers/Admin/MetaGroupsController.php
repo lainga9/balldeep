@@ -46,33 +46,40 @@ class MetaGroupsController extends Controller {
 	{
 		$group = $this->group->create($request->only('name'));
 
-		foreach( $request->get('fields') as $data )
-		{
-			$group->fields()->create($data);
-		}
-
-		$group->postTypes()->sync($request->get('types'));
-
-		return redirect()->route('balldeep.admin.groups.edit', $group)->with('success', 'Group updated!');
+		return redirect()->route('balldeep.admin.groups.edit', $group)->with('success', 'Group created!');
 	}
 
 	public function update(MetaGroup $group, StoreMetaGroupRequest $request)
 	{
 		$group->update($request->only('name'));
 
-		foreach( $request->get('fields') as $id => $data )
+		if( $request->get('fields') )
 		{
-			$group->fields()->find($id)->update($data);
+			foreach( $request->get('fields') as $id => $data )
+			{
+				$group->fields()->find($id)->update($data);
+			}
 		}
 
 		$group->postTypes()->sync($request->get('types'));
 
-		return redirect()->back()->with('success', 'Group updated!');		
+		return redirect()->back()->with('success', 'Group updated!');
+	}
+
+	public function delete(MetaGroup $group)
+	{
+		$group->delete();
+
+		return redirect()->back()->with('success', 'Group deleted!');
 	}
 
 	public function addField(MetaGroup $group, StoreMetaFieldRequest $request)
 	{
 		$group->fields()->create($request->all());
+
+		return response()->json([
+			'html' => view('balldeep::admin.groups.fields', compact('group'))->render()
+		]);
 
 		return redirect()->back()->with('success', 'Field added!');
 	}

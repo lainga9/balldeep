@@ -3,13 +3,12 @@
 namespace Lainga9\BallDeep\app\Http\Controllers\Admin;
 
 use Lainga9\BallDeep\app\Http\Controllers\Controller;
-use Illuminate\Console\DetectsApplicationNamespace;
 use Lainga9\BallDeep\app\Http\Requests\StoreUserRequest;
 use Silber\Bouncer\Database\Role;
+use Schema;
+use Lainga9\BallDeep\app\User;
 
 class UsersController extends Controller {
-
-	use DetectsApplicationNamespace;
 
 	/**
 	 * Instance of User model
@@ -28,11 +27,9 @@ class UsersController extends Controller {
 	/**
 	 * Constructor method
 	 */
-	public function __construct(Role $role)
+	public function __construct(User $user, Role $role)
 	{
-		$model = '\\' . $this->getAppNamespace() . 'User';
-
-        $this->user = new $model;
+        $this->user = $user;
         $this->role = $role;
 	}
 
@@ -52,17 +49,15 @@ class UsersController extends Controller {
 
 	public function store(StoreUserRequest $request)
 	{
-		$user = $this->user->create($request->except(['password', 'role']) + ['password' => bcrypt($request->input('password'))]);
+		$user = $this->user->create($request->except(['password_confirmation', 'role']));
 
 		$user->assign($request->get('role'));
 
 		return redirect()->route('balldeep.admin.users.index')->with('success', 'User successfully added');
 	}
 
-	public function abilities($userId)
+	public function abilities(User $user)
 	{
-		$user = $this->user->findOrFail($userId);
-
 		return view('balldeep::admin.users.abilities', compact('user'));
 	}
 }

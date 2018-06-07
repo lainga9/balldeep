@@ -2,6 +2,8 @@
 
 namespace Lainga9\BallDeep\app;
 
+use Exception;
+
 class PostMeta extends Model {
 
 	/*
@@ -48,6 +50,37 @@ class PostMeta extends Model {
 	|--------------------------------------------------------------------------
 	|
 	*/
+
+	/**
+	 * Serialize value if it's an array
+	 * 
+	 * @param string|array $value
+	 */
+	public function setValueAttribute($value)
+	{
+		if( is_array($value) ) $value = serialize($value);
+
+		$this->attributes['value'] = $value;
+	}
+
+	/**
+	 * Unserialise value if required
+	 * 
+	 * @param  string $value
+	 * @return string|array
+	 */
+	public function getValueAttribute($value)
+	{
+		try
+		{
+			return unserialize($value);
+		}
+
+		catch( Exception $e )
+		{
+			return $value;
+		}
+	}
 
 	/**
 	 * Return the value for the meta item

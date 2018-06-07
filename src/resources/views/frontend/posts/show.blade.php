@@ -2,28 +2,34 @@
 
 @section('content')
 
-	<h1>{!! $post->title() !!}</h1>
+	<article class="bd-post bd-post--{!! $post->type->slug !!}">
 
-	@if( $post->taxonomies->isNotEmpty() )
-		<ul>
-			@foreach( $post->taxonomies as $tax )
-				<li><a href="{!! $tax->link() !!}">{!! $tax->name !!}</a></li>
-			@endforeach
-		</ul>
-	@endif
+		<h1 class="bd-post__title">{!! $post->title() !!}</h1>
 
-	@if( $post->media && ($item = $post->media->getFirstMedia('featured')) )
+		@if( $post->taxonomies->isNotEmpty() )
+			<ul class="bd-post__taxonomies">
+				@foreach( $post->taxonomies as $tax )
+					<li class="bd-post__taxonomies-item">
+						<a class="bd-post__taxonomies-link" href="{!! $tax->link() !!}">{!! $tax->name !!}</a>
+					</li>
+				@endforeach
+			</ul>
+		@endif
 
-		{!! $item->toHtml() !!}
+		<div class="bd-post__meta">
+			<p class="bd-post__published">{!! $post->publishedAt() !!}</p>
+		</div>
 
-	@endif
+		@if( $post->media && ($item = $post->media->getFirstMedia('featured')) )
 
-	<p>{!! $post->publishedAt() !!}</p>
+			{!! $item->img('', ['class' => 'bd-post__image img-fluid']) !!}
 
-	<hr>
+		@endif
 
-	{!! $post->content() !!}
+		<div class="bd-post__content">
+			{!! $post->content() !!}
+		</div>
 
-	<p><strong>Stadium: </strong>{!! $post->meta('stadium') !!}</p>
+	</article>
 
 @stop

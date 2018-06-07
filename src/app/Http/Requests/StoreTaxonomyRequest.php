@@ -3,6 +3,7 @@
 namespace Lainga9\BallDeep\app\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Auth;
 
 class StoreTaxonomyRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class StoreTaxonomyRequest extends FormRequest
      */
     public function authorize()
     {
-        return ! is_null($this->user()) && $this->user()->isAn('admin');
+        return Auth::guard('balldeep')->user();
     }
 
     /**

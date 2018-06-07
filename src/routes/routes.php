@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Frontend post routes
+ * Frontend post/content routes
  */
 app('router')->group([
-	'prefix' => 'content',
+	'prefix' => config('balldeep.content_prefix'),
 	'namespace' => '\Lainga9\BallDeep\app\Http\Controllers',
 	'middleware' => ['web', 'bindings']
 ], function()
@@ -21,12 +21,71 @@ app('router')->group([
 });
 
 /**
+ * Any post type index routes defined by user
+ * e.g 'blog' for posts etc
+ */
+$urls = config('balldeep.post_type_urls');
+
+if( count($urls) )
+{
+	foreach( $urls as $type => $url )
+	{
+		app('router')->get($url, [
+			'as'	=> 'balldeep.blog',
+			'uses'	=> '\Lainga9\BallDeep\app\Http\Controllers\PostsController@type'
+		]);
+	}
+}
+
+/**
+ * Authentication routes
+ */
+app('router')->group([
+	'prefix' => 'manage/auth',
+	'namespace' => '\Lainga9\BallDeep\app\Http\Controllers\Auth',
+	'middleware' => ['web', 'bindings']
+], function()
+{
+	app('router')->get('login', [
+		'as'	=> 'balldeep.login',
+		'uses'	=> 'LoginController@showLoginForm'
+	]);
+
+	app('router')->get('logout', [
+		'as'	=> 'balldeep.logout',
+		'uses'	=> 'LoginController@logout'
+	]);
+
+	app('router')->post('login', [
+		'as'	=> 'balldeep.login.do',
+		'uses'	=> 'LoginController@login'
+	]);
+});
+
+
+/**
+ * Frontend non-content routes
+ */
+app('router')->group([
+	'prefix' => 'balldeep',
+	'namespace' => '\Lainga9\BallDeep\app\Http\Controllers',
+	'middleware' => ['web', 'bindings']
+], function()
+{
+	app('router')->post('forms/submit/{form}', [
+		'as'	=> 'balldeep.forms.submit',
+		'uses'	=> 'FormsController@submit'
+	]);
+});
+
+/**
  * Backend routes
  */
 app('router')->group([
 	'prefix' => 'manage', 
 	'namespace' => '\Lainga9\BallDeep\app\Http\Controllers\Admin',
-	'middleware' => ['web', 'bindings']
+	'guard' => 'balldeep',
+	'middleware' => ['web', 'bindings', \Lainga9\BallDeep\app\Http\Middleware\CheckUserIsBallDeep::class]
 ], function()
 {
 	app('router')->get('/', [
@@ -34,12 +93,138 @@ app('router')->group([
 		'uses'	=> 'BaseController@index'
 	]);
 
+	/**
+	 * Settings Routes
+	 */
+	app('router')->group(['prefix' => 'settings', 'middleware' => 'can:manage-settings'], function()
+	{
+		app('router')->get('/', [
+			'as'	=> 'balldeep.admin.settings.index',
+			'uses'	=> 'SettingsController@index'
+		]);
+
+		app('router')->post('/', [
+			'as'	=> 'balldeep.admin.settings.update',
+			'uses'	=> 'SettingsController@update'
+		]);
+	});
+
+	/**
+	 * Ajax routes
+	 */
 	app('router')->group(['prefix' => 'ajax', 'namespace' => 'Ajax'], function()
 	{
 		app('router')->get('media/gallery', [
 			'as'	=> 'balldeep.admin.ajax.media-gallery',
 			'uses'	=> 'MediaController@getGalleryHtml'
 		]);
+
+		app('router')->get('field/create', [
+			'as'	=> 'balldeep.admin.ajax.field.create',
+			'uses'	=> 'UtilitiesController@getCreateFieldHtml'
+		]);
+
+		/**
+		 * Convert a string to one which is suitable for 
+		 * input names e.g. alpha_numeric_underscore
+		 */
+		app('router')->get('strings/slug', [
+			'as'	=> 'balldeep.admin.ajax.utilities.input.name.generate',
+			'uses'	=> 'UtilitiesController@generateInputName'
+		]);
+	});
+
+	/**
+	 * Form routes
+	 */
+	app('router')->group(['prefix' => 'forms', 'middleware' => 'can:manage-forms'], function()
+	{
+		app('router')->get('/', [
+			'as'	=> 'balldeep.admin.forms.index',
+			'uses'	=> 'FormsController@index'
+		]);
+
+		app('router')->get('create', [
+			'as'	=> 'balldeep.admin.forms.create',
+			'uses'	=> 'FormsController@create'
+		]);
+
+		app('router')->post('create', [
+			'as'	=> 'balldeep.admin.forms.store',
+			'uses'	=> 'FormsController@store'
+		]);
+
+		app('router')->get('entries/{form}', [
+			'as'	=> 'balldeep.admin.forms.entries',
+			'uses'	=> 'FormsController@entries'
+		]);
+
+		app('router')->get('entry/{entry}', [
+			'as'	=> 'balldeep.admin.forms.entries.show',
+			'uses'	=> 'FormEntriesController@show'
+		]);
+
+		app('router')->get('edit/{form}', [
+			'as'	=> 'balldeep.admin.forms.edit',
+			'uses'	=> 'FormsController@edit'
+		]);
+
+		app('router')->put('edit/{form}', [
+			'as'	=> 'balldeep.admin.forms.update',
+			'uses'	=> 'FormsController@update'
+		]);
+
+		/**
+		 * Form notification routes
+		 */
+		app('router')->group(['prefix' => 'notifications'], function()
+		{
+			app('router')->get('{form}', [
+				'as'	=> 'balldeep.admin.forms.notifications.index',
+				'uses'	=> 'FormsController@notifications'
+			]);
+
+			app('router')->get('create/{form}', [
+				'as'	=> 'balldeep.admin.forms.notifications.create',
+				'uses'	=> 'FormNotificationsController@create'
+			]);
+
+			app('router')->post('create/{form}', [
+				'as'	=> 'balldeep.admin.forms.notifications.store',
+				'uses'	=> 'FormNotificationsController@store'
+			]);
+
+			app('router')->get('edit/{notification}', [
+				'as'	=> 'balldeep.admin.forms.notifications.edit',
+				'uses'	=> 'FormNotificationsController@edit'
+			]);
+
+			app('router')->put('edit/{notification}', [
+				'as'	=> 'balldeep.admin.forms.notifications.update',
+				'uses'	=> 'FormNotificationsController@update'
+			]);
+		});
+
+		/**
+		 * Form Field Routes
+		 */
+		app('router')->group(['prefix' => 'fields'], function()
+		{
+			app('router')->post('add/{form}', [
+				'as'	=> 'balldeep.admin.forms.fields.add',
+				'uses'	=> 'FormsController@addField'
+			]);
+
+			app('router')->post('reorder/{form}', [
+				'as'	=> 'balldeep.admin.forms.fields.reorder',
+				'uses'	=> 'FormsController@reorderFields'
+			]);
+
+			app('router')->delete('delete/{field}', [
+				'as'	=> 'balldeep.admin.forms.fields.delete',
+				'uses'	=> 'FormFieldsController@delete'
+			]);
+		});
 	});
 
 	/**
@@ -62,7 +247,7 @@ app('router')->group([
 			'uses'	=> 'UsersController@store'
 		]);
 
-		app('router')->get('abilities/{userId}', [
+		app('router')->get('abilities/{user}', [
 			'as'	=> 'balldeep.admin.users.abilities',
 			'uses'	=> 'UsersController@abilities'
 		]);
@@ -71,33 +256,33 @@ app('router')->group([
 	/**
 	 * Roles management
 	 */
-	// app('router')->group(['prefix' => 'roles', 'middleware' => ['can:manage-users']], function()
-	// {
-	// 	app('router')->get('/', [
-	// 		'as'	=> 'balldeep.admin.roles.index',
-	// 		'uses'	=> 'RolesController@index'
-	// 	]);
+	app('router')->group(['prefix' => 'roles', 'middleware' => ['can:manage-users']], function()
+	{
+		app('router')->get('/', [
+			'as'	=> 'balldeep.admin.roles.index',
+			'uses'	=> 'RolesController@index'
+		]);
 
-	// 	app('router')->get('create', [
-	// 		'as'	=> 'balldeep.admin.roles.create',
-	// 		'uses'	=> 'RolesController@create'
-	// 	]);
+		app('router')->get('create', [
+			'as'	=> 'balldeep.admin.roles.create',
+			'uses'	=> 'RolesController@create'
+		]);
 
-	// 	app('router')->post('create', [
-	// 		'as'	=> 'balldeep.admin.roles.store',
-	// 		'uses'	=> 'RolesController@store'
-	// 	]);
+		app('router')->post('create', [
+			'as'	=> 'balldeep.admin.roles.store',
+			'uses'	=> 'RolesController@store'
+		]);
 
-	// 	app('router')->get('edit/{role}', [
-	// 		'as'	=> 'balldeep.admin.roles.edit',
-	// 		'uses'	=> 'RolesController@edit'
-	// 	]);
+		app('router')->get('edit/{role}', [
+			'as'	=> 'balldeep.admin.roles.edit',
+			'uses'	=> 'RolesController@edit'
+		]);
 
-	// 	app('router')->put('edit/{role}', [
-	// 		'as'	=> 'balldeep.admin.roles.update',
-	// 		'uses'	=> 'RolesController@update'
-	// 	]);
-	// });
+		app('router')->put('edit/{role}', [
+			'as'	=> 'balldeep.admin.roles.update',
+			'uses'	=> 'RolesController@update'
+		]);
+	});
 
 	/**
 	 * Content Management
@@ -132,6 +317,11 @@ app('router')->group([
 			app('router')->put('edit/{group}', [
 				'as'	=> 'balldeep.admin.groups.update',
 				'uses'	=> 'MetaGroupsController@update'
+			]);
+
+			app('router')->delete('delete/{group}', [
+				'as'	=> 'balldeep.admin.groups.delete',
+				'uses'	=> 'MetaGroupsController@delete'
 			]);
 
 			app('router')->post('fields/add/{group}', [
@@ -224,11 +414,16 @@ app('router')->group([
 	/**
 	 * Media Management
 	 */
-	app('router')->group(['prefix' => 'media'], function()
+	app('router')->group(['prefix' => 'media', 'middleware' => 'can:manage-media'], function()
 	{
 		app('router')->get('/', [
 			'as'	=> 'balldeep.admin.media.index',
 			'uses'	=> 'MediaController@index'
+		]);
+
+		app('router')->get('details/{media}', [
+			'as'	=> 'balldeep.admin.media.show',
+			'uses'	=> 'MediaController@show'
 		]);
 
 		app('router')->delete('{media}', [

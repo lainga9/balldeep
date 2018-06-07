@@ -4,6 +4,12 @@
 
 @section('content')
 
+	@if( $revision )
+
+		<div class="alert alert-warning mb-4">You are viewing a revision of this {!! $post->type->name !!} created on {!! $revision->created_at->format('d M y g:ia') !!} &bull; <a class="alert-link" href="{!! route('balldeep.admin.posts.edit', $post) !!}">View Original</a></div>
+
+	@endif
+
 	<form action="{!! route('balldeep.admin.posts.update', $post) !!}" method="POST" enctype="multipart/form-data">
 		{!! csrf_field() !!}
 		<input type="hidden" name="_method" value="PUT">
@@ -22,7 +28,7 @@
 						name="content"
 						class="form-control"
 						data-trumbo
-					>{!! old('content', $post->content) !!}</textarea>
+					>{!! $revision ? $revision->content() : old('content', $post->content) !!}</textarea>
 				</div>
 
 				@if( $post->type->metaGroups->isNotEmpty() )
@@ -51,7 +57,13 @@
 
 				<div class="mb-4">
 					<a target="_blank" href="{!! $post->url() !!}" class="btn btn-secondary">View on Frontend</a>
-					<button type="submit" class="btn btn-primary">Update {!! ucwords($post->type->name) !!}</button>
+					<button type="submit" class="btn btn-primary">
+						@if( $revision )
+							Restore this revision
+						@else
+							Update {!! ucwords($post->type->name) !!}
+						@endif
+					</button>
 				</div>
 
 				@if( $post->type->hierarchical )
@@ -75,6 +87,23 @@
 							</select>
 						</div>
 					</div>
+
+				@endif
+
+				@if( $post->revisions->isNotEmpty() )
+
+					<div class="box mb-4 box--bordered">
+						<header class="box__header">
+							<p class="box__title">Edit History</p>
+						</header>
+						<ul class="list list--plain">
+							@foreach( $post->revisions()->limit(5)->get() as $revision )
+								<li class="list__item">
+									<a href="{!! route('balldeep.admin.posts.edit', [$post, 'revision' => $revision->id]) !!}">{!! $revision->created_at->format('d M y g:ia') !!} by {!! $revision->user ? $revision->user->name() : 'N/A' !!}</a>
+								</li>
+							@endforeach
+						</ul>
+					</div>				
 
 				@endif
 

@@ -33,49 +33,44 @@
 					<input type="text" name="name" class="form-control" value="{!! old('name') !!}">
 				</div>
 
-				<h4 class="mt-3 mb-4">Post Types</h4>
+				{{-- <div class="box box--bordered elem--shadow mt-3 mb-4">
+					<header class="box__header">
+						<h4 class="box__title">Post Types</h4>
+					</header>
 
-				@foreach( $types as $type )
-				
-					<div>
-						<input 
-							id="type-{!! $type->id !!}"
-							type="checkbox"
-							name="types[]"
-							value="{!! $type->id !!}"
-						>
-						<label for="type-{!! $type->id !!}">{!! $type->name !!}</label>
+					@foreach( $types as $type )
+					
+						<div>
+							<input 
+								id="type-{!! $type->id !!}"
+								type="checkbox"
+								name="types[]"
+								value="{!! $type->id !!}"
+							>
+							<label for="type-{!! $type->id !!}">{!! $type->name !!}</label>
+						</div>
+					
+					@endforeach
+				</div>
+
+				<div class="box box--bordered elem--shadow mt-3 mb-4">
+					<header class="box__header">
+						<h4 class="box__title">Fields</h4>
+					</header>
+
+					<div data-row-container>
+
+						@for ($i = 0; $i < Session::get('rows', 1); $i++ )
+
+							@include('balldeep::_partials.fields.create', ['index' => $i])
+
+						@endfor
+						
 					</div>
-				
-				@endforeach
 
-				<h4 class="mt-3 mb-4">Fields</h4>
+				</div> --}}
 
-				<div class="form-group">
-					<label class="form-label">Name</label>
-					<input type="text" name="fields[name]" value="{!! old('name') !!}" class="form-control">
-				</div>
-
-				<div class="form-group">
-					<label class="form-label">Label</label>
-					<input type="text" name="fields[label]" value="{!! old('label') !!}" class="form-control">
-				</div>
-
-				<div class="form-group">
-					<label class="form-label">Type</label>
-					<select name="fields[type]" class="form-control">
-						<option value="text"<?php if( old('type') == 'text' ) : ?> selected<?php endif; ?>>Text</option>
-						<option value="textarea"<?php if( old('type') == 'textarea' ) : ?> selected<?php endif; ?>>Textarea</option>
-						<option value="select"<?php if( old('type') == 'select' ) : ?> selected<?php endif; ?>>Select</option>
-					</select>
-				</div>
-
-				<div class="form-group">
-					<label class="form-label">Options</label>
-					<textarea name="fields[options]" class="form-control">{!! old('options') !!}</textarea>
-				</div>
-
-				<button type="submit" class="btn btn-primary">Update Group</button>
+				<button type="submit" class="btn btn-primary">Save Group</button>
 
 			</form>
 			

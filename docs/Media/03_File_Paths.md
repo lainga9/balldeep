@@ -1,0 +1,1 @@
+By default, files will be uploaded to the path 'uploads/media' in your chosen filesystem. This can be modified by updating the 'media_upload_directory' config value in config/balldeep.php

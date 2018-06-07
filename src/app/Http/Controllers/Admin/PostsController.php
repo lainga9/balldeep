@@ -11,6 +11,7 @@ use Lainga9\BallDeep\app\Http\Requests\StorePostRequest;
 use Lainga9\BallDeep\app\Repositories\UploadsRepository;
 use Storage;
 use Spatie\MediaLibrary\Models\Media;
+use Auth;
 
 class PostsController extends Controller {
 
@@ -59,12 +60,22 @@ class PostsController extends Controller {
 	
 	public function index(PostType $postType, Request $request)
 	{
-		$posts = $postType->posts()
-					->topLevel()
-					->taxonomy($request->get('taxonomy'))
+		$query = $postType->posts()
+					->taxonomy($taxonomy = $request->get('taxonomy'))
 					->visibleTo($request->user())
-					->latest()
-					->get();
+					->latest();
+
+		/**
+		 * Sometimes child posts are in a taxonomy when their
+		 * parent isn't so we don't want to include only top
+		 * level posts in this scenario
+		 */
+		if( ! $taxonomy )
+		{
+			$query->topLevel();
+		}
+
+		$posts = $query->get();
 
 		return view('balldeep::admin.posts.index', compact('posts') + ['type' => $postType]);
 	}
@@ -80,8 +91,8 @@ class PostsController extends Controller {
 			'taxonomies',
 			'image',
 			'image_remove',
-			'meta'
-		]));
+			'meta',
+		]) + ['user_id' => $request->user()->id]);
 
 		if( ! $request->get('media_id') && $request->hasFile('image') )
 		{
@@ -91,14 +102,17 @@ class PostsController extends Controller {
 
 			$media->addMedia(storage_path('app/public/'.$path))
 				->withResponsiveImages()
-				->toMediaCollection('featured');
+				->addCustomHeaders([
+					'ACL' => 'public-read'
+				])
+				->toMediaCollection('featured', config('filesystems.default'));
 
 			$post->update(['media_id' => $media->id]);
 		}
 
 		$post->taxonomies()->attach($request->get('taxonomies'));
 
-		if( count($request->get('meta')) )
+		if( $request->get('meta') && count($request->get('meta')) )
 		{
 			foreach( $request->get('meta') as $key => $value )
 			{
@@ -112,9 +126,11 @@ class PostsController extends Controller {
 		return redirect()->route('balldeep.admin.posts.edit', $post)->with('success', sprintf('%s successfully added!', ucwords($post->type->name)));
 	}
 
-	public function edit(Post $post)
+	public function edit(Post $post, Request $request)
 	{
-		return view('balldeep::admin.posts.edit', compact('post'));
+		$revision = ($id = $request->get('revision')) ? $post->revisions()->find($id) : null;
+
+		return view('balldeep::admin.posts.edit', compact('post', 'revision'));
 	}
 
 	public function update(Post $post, StorePostRequest $request)
@@ -134,7 +150,10 @@ class PostsController extends Controller {
 
 			$media->addMedia(storage_path('app/public/'.$path))
 				->withResponsiveImages()
-				->toMediaCollection('featured');
+				->addCustomHeaders([
+					'ACL' => 'public-read'
+				])
+				->toMediaCollection('featured', config('filesystems.default'));
 
 			$post->update(['media_id' => $media->id]);
 		}
@@ -144,13 +163,15 @@ class PostsController extends Controller {
 			$post->media->delete();
 		}
 
-		if( count($request->get('meta')) )
+		if( $request->get('meta') && count($request->get('meta')) )
 		{
 			foreach( $request->get('meta') as $key => $value )
 			{
 				if( $value )
 				{
-					$post->metas()->create(compact('key', 'value'));
+					$meta = $post->metas()->firstOrCreate(compact('key'));
+
+					$meta->update(compact('value'));
 				}
 			}
 		}

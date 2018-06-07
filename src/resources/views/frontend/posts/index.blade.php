@@ -2,10 +2,22 @@
 
 @section('content')
 
-	@foreach( $posts as $post )
+	<div class="bd-grid bd-grid--{!! $type->slug !!}">
 
-		<a href="{!! $post->url() !!}">{!! $post->title() !!} - <small>{!! $post->publishedAt() !!}</small></a>
+		@foreach( $posts as $post )
 
-	@endforeach
+			<div class="bd-grid__item">
+
+				{!! $post->template('excerpt') !!}
+				
+			</div>
+
+		@endforeach
+
+	</div>
+
+	<div class="bd-pagination">
+		{!! $posts->links() !!}
+	</div>
 
 @stop

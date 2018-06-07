@@ -4,7 +4,38 @@ add
 
 `"lainga9/balldeep": "dev-master"`
 
+for local setup also add
+
+```
+"repositories": [
+    {
+        "type": "path",
+        "url": "../packages/lainga9/balldeep/",
+        "options": {
+            "symlink": true
+        }
+    }
+]
+```
+
+and
+
+```
+"autoload-dev": {
+    "psr-4": {
+        "Tests\\": "tests/",
+        "Lainga9\\BallDeep\\": "../packages/lainga9/balldeep/src"
+    }
+}
+```
+
 to composer.json and update
+
+if the requirements cannot be resolved try adding
+
+`"minimum-stability": "dev"` 
+
+to main project's composer.json file
 
 then
 
@@ -33,64 +64,47 @@ php artisan storage:link
 
 ## User Management
 
-
-
-## Roles and Permissions
-
-https://github.com/JosephSilber/bouncer
-
-Add to User model
+Add
 
 ```
-use Silber\Bouncer\Database\HasRolesAndAbilities;
+'balldeep' => [
+    'driver' => 'session',
+    'provider' => 'balldeep',
+],
 ```
 
-## Sitemaps
-
-Sitemaps are generated using this package
-
-[https://github.com/Laravelium/laravel-sitemap](https://github.com/Laravelium/laravel-sitemap)
-
-Command - balldeep:generate-sitemap {models*}
-
-where models are a list of fully namespaced models which you would like added to the sitemap e.g.
-
-```balldeep:generate-sitemap App\\Page App\\Post```
-
-**Setup**
-
-Define a method on the required models as follows:
+to guards array and 
 
 ```
-public function getSitemapUrl()
-{
-	// Return the URL which should be added to the sitemap
-	return $this->url;
-}
+'balldeep' => [
+    'driver' => 'eloquent',
+    'model' => Lainga9\BallDeep\app\User::class,
+],
 ```
 
-An updated_at timestamp column in the model's table is also required.
+to providers array in config/auth.php.
+
+## Setup
+
+To run setup you can optionally run
+
+```
+php artisan balldeep:setup
+```
+
+Add facade to config/app.php
+
+Add styles to layout
+
+`BallDeep::styles()`
 
 ## Media Manager
 
 https://github.com/spatie/laravel-medialibrary
 
+Update config/medialibrary.php to use correct S3 bucket
+
+Also add in path to custom MediaPathGenerator.php class
+
 
 ## Menu Manager
-
-
-## Content Manager
-
-Comes with default post types: page and post
-
-A route with the plural of any post type is added automatically e.g.
-
-site.test/content/posts
-
-Views are published to vendor/balldeep/ and can be edited here.
-
-Or, you can add a directory in your views directory with the plural name of the post type and index.blade.php for the index page and show.blade.php for the single
-
-The index view is passed a Collection and the single view is passed a Model. Both views are passed the post type model.
-
-Category views can be overridden by adding a folder named the taxonomy name within the corresponding post type folder e.g. /posts/sport/index.blade.php

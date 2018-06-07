@@ -1,5 +1,5 @@
 <textarea 
-	name="meta[{!! $field->name !!}]"
+	name="{!! $field->name !!}"
 	class="{!! $field->class ?: 'form-control' !!}"
 	@if( $field->required )
 		required
@@ -7,4 +7,4 @@
 	@if( $placeholder = $field->placeholder )
 		placeholder="{!! $placeholder !!}"
 	@endif
-><?php if( $value = $field->value ) : ?>{!! $value !!}<?php endif; ?></textarea>
+><?php if( $value ) : ?>{!! $value !!}<?php endif; ?></textarea>

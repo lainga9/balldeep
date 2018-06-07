@@ -8,11 +8,11 @@
 
 			<div class="container">
 				
-				<ul>
+				<ul class="list list--plain">
 					
 					@foreach( $errors->all() as $error )
 			
-						<li>{{ $error }}</li>
+						<li class="list__item">{{ $error }}</li>
 			
 					@endforeach
 			

@@ -39,7 +39,10 @@ class MetaGroup extends Model {
 	 */
 	public function fields()
 	{
-		return $this->hasMany('Lainga9\BallDeep\app\MetaField', 'meta_group_id');
+		return $this->hasMany(
+			'Lainga9\BallDeep\app\MetaField',
+			'meta_group_id'
+		);
 	}
 
 	/**
@@ -50,6 +53,11 @@ class MetaGroup extends Model {
 	 */
 	public function postTypes()
 	{
-		return $this->belongsToMany('Lainga9\BallDeep\app\PostType', 'bd_meta_group_post_type', 'meta_group_id', 'post_type_id');
+		return $this->belongsToMany(
+			'Lainga9\BallDeep\app\PostType',
+			'bd_meta_group_post_type',
+			'meta_group_id',
+			'post_type_id'
+		);
 	}
 }

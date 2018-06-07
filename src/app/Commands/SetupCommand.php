@@ -7,12 +7,12 @@ use Illuminate\Console\Command;
 use Schema;
 use Lainga9\BallDeep\app\PostType;
 use Lainga9\BallDeep\app\Menu;
+use Lainga9\BallDeep\app\User;
+use Lainga9\BallDeep\app\Setting;
 use Exception;
 
 class SetupCommand extends Command
 {
-    use DetectsApplicationNamespace;
-
     /**
      * The name and signature of the console command.
      *
@@ -39,13 +39,11 @@ class SetupCommand extends Command
      *
      * @return void
      */
-    public function __construct(PostType $postType, Menu $menu)
+    public function __construct(User $user, PostType $postType, Menu $menu)
     {
         parent::__construct();
 
-        $model = '\\' . $this->getAppNamespace() . 'User';
-
-        $this->user = new $model;
+        $this->user = $user;
         $this->postType = $postType;
         $this->menu = $menu;
     }
@@ -57,7 +55,7 @@ class SetupCommand extends Command
      */
     protected function askForUser()
     {
-        return $this->choice('Do you want to create a new admin user or select from existing?', ['New', 'Existing', 'Skip']);
+        return $this->choice('Do you want to create a new admin user?', ['No', 'Yes']);
     }
 
     /**
@@ -73,31 +71,7 @@ class SetupCommand extends Command
     {
         $choice = $this->askForUser();
 
-        if( $choice == "Existing" )
-        {
-            $email = $this->ask('What is their email address?');
-
-            $user = $this->user->where('email', $email)->first();
-
-            if( ! $user )
-            {
-                $this->info(sprintf('User with email %s not found', $email));
-
-                return $this->findUser();
-            }
-
-            return $user;
-        }
-        elseif( $choice == 'New')
-        {
-            return $this->createUser();
-        }
-
-        // If user has selected to skip creating a user
-        else
-        {
-            return false;
-        }
+        return $choice == "Yes" ? $this->createUser() : false;
     }
 
     /**
@@ -118,21 +92,11 @@ class SetupCommand extends Command
         $params = [
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'name' => sprintf('%s %s', $firstName, $lastName),
             'email' => $email,
-            'password' => method_exists($this->user, 'setPasswordAttribute') ? $password : bcrypt($password)
+            'password' => $password
         ];
 
-        if( Schema::hasColumn('users', 'first_name') && Schema::hasColumn('users', 'last_name') )
-        {
-            $user = $this->user->create(array_except($params, ['name']));
-        }
-        elseif( Schema::hasColumn('users', 'name') )
-        {
-            $user = $this->user->create(array_except($params, ['first_name', 'last_name']));   
-        }
-
-        return $user;
+        return $this->user->create($params);
     }
 
     /**

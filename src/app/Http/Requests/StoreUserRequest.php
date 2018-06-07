@@ -3,6 +3,7 @@
 namespace Lainga9\BallDeep\app\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Auth;
 
 class StoreUserRequest extends FormRequest
 {
@@ -13,7 +14,9 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return ! is_null($this->user()) && $this->user()->isAn('admin');
+        $user = Auth::guard('balldeep')->user();
+        
+        return ! is_null($user) && $user->isAn('admin');
     }
 
     /**
@@ -24,7 +27,8 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed',
             'role' => 'required'

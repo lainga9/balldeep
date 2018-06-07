@@ -1,6 +1,6 @@
 <input 
 	type="text"
-	name="meta[{!! $field->name !!}]"
+	name="{!! $field->name !!}"
 	class="{!! $field->class ?: 'form-control' !!}"
 	@if( $field->required )
 		required
@@ -8,7 +8,7 @@
 	@if( $placeholder = $field->placeholder )
 		placeholder="{!! $placeholder !!}"
 	@endif
-	@if( $value = $field->value )
+	@if( $value )
 		value="{!! $value !!}"
 	@endif
 >

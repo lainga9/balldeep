@@ -30,7 +30,8 @@ class BallDeepServiceProvider extends ServiceProvider {
     protected $commands = [
         app\Commands\GenerateSitemapCommand::class,
         app\Commands\SetupCommand::class,
-        app\Commands\GeneratePostTypeCommand::class
+        app\Commands\GeneratePostTypeCommand::class,
+        app\Commands\AddSeoMetaCommand::class
     ];
 
     /**
@@ -73,6 +74,30 @@ class BallDeepServiceProvider extends ServiceProvider {
         }
     }
 
+    protected function registerGuardRouteFilter()
+    {
+        $this->app['router']->matched(function (\Illuminate\Routing\Events\RouteMatched $e) {
+            $route = $e->route;
+            if (!array_has($route->getAction(), 'guard')) {
+                return;
+            }
+            $routeGuard = array_get($route->getAction(), 'guard');
+            $this->app['auth']->resolveUsersUsing(function ($guard = null) use ($routeGuard) {
+                return $this->app['auth']->guard($routeGuard)->user();
+            });
+            $this->app['auth']->setDefaultDriver($routeGuard);
+        });
+    }
+
+    protected function registerViewComposers()
+    {
+         $this->app
+            ->make('view')
+            ->composer([
+                'balldeep::_partials.media-gallery',
+            ], 'Lainga9\BallDeep\app\Composers\MediaGalleryViewComposer');
+    }
+
     /**
      * Register the application services.
      *
@@ -84,11 +109,9 @@ class BallDeepServiceProvider extends ServiceProvider {
             __DIR__.'/config/config.php', $this->packageName
         );
 
-        $this->app
-            ->make('view')
-            ->composer([
-                'balldeep::_partials.media-gallery',
-            ], 'Lainga9\BallDeep\app\Composers\MediaGalleryViewComposer');
+        $this->registerViewComposers();
+
+        $this->registerGuardRouteFilter();
 
         $this->app->bind('BallDeep', function()
         {

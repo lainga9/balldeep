@@ -7,6 +7,187 @@ require('bootstrap');
 
 jQuery(document).ready(function($) {
 
+	$(document).on('click', '[data-insert-text]', function(e) {
+		e.preventDefault();
+		var $this = $(this);
+		var $input = $($this.data('insert-input'));
+		if( $input.length > 0 ) {
+			var $pos = $input[0].selectionStart;
+			var $existing = $input.val();
+			var $toAdd = $this.data('insert-text');
+			$input.val($existing.substring(0, $pos) + $toAdd + $existing.substring($pos));
+		} else {
+			console.error('Input ' + $this.data('insert-input') + ' not found');
+		}
+	});
+
+	/*
+	 * Form Builder
+	 */
+	var $formBuilder = (function() {
+
+		var $container = $('[data-form-fields]'),
+
+		initEvents = function() {
+			$(document).on('click', '[data-add-field]', function(e) {
+				e.preventDefault();
+				var $this = $(this);
+				$.ajax({
+					type: "POST",
+					url: $this.closest('[data-add-fields]').data('add-fields'),
+					data: {
+						_token: $('meta[name="csrf-token"]').prop('content'),
+						type: $this.data('add-field'),
+					},
+					success: function(response) {
+						$container.append(response.html);
+					},
+					error: function(response) {
+						console.error(response);
+					}
+				});
+			});
+
+			$(document).on('click', '[data-delete-field]', function(e) {
+				e.preventDefault();
+				var $this = $(this);
+				var $confirm = confirm($(this).data('confirm'));
+				if( ! $confirm ) return false;
+				$.ajax({
+					type: "POST",
+					url: $this.data('delete-field'),
+					data: {
+						_token: $('meta[name="csrf-token"]').prop('content'),
+						_method: 'DELETE'
+					},
+					success: function(response) {
+						$container.html(response.html);
+					}
+				});
+			});
+		},
+
+		init = function() {
+			initEvents();
+		};
+
+		return {init: init};
+
+	})();
+
+	$formBuilder.init();
+
+	/*
+	 * Conditional logic
+	 */
+	$(document).on('change', '[data-show-when]', function() {
+		var $this = $(this);
+		var $val = $this.val();
+		var $rules = $this.data('show-when');
+		$.each($rules, function($index, $value) {
+			var $pieces = $value.split('|');
+			var $elem = $($pieces[0]);
+			if( $elem.length > 0 ) {
+				var $matches = $pieces[1];
+				if( $matches.indexOf(',') > -1 ) {
+					$matches = $matches.split(',');
+					if( $matches.indexOf($val) > -1 ) {
+						$elem.show();
+					} else {
+						$elem.hide();
+					}
+				} else {
+					if( $pieces[1] == $val ) {
+						$elem.show();
+					} else {
+						$elem.hide();
+					}
+				}
+			}
+		});
+	});
+
+	/*
+	 * When entering text in a label field, 
+	 * automatically populate the name field
+	 */
+	$(document).on('blur', '[data-input-label]', function() {
+		var $this = $(this);
+		var $val = $this.val();
+		console.log($this.data('input-label'));
+		$.ajax({
+			type: "GET",
+			url: $this.data('generate-input-name'),
+			data: {
+				string: $val
+			},
+			success: function(response) {
+				var $name = $this.data('input-label');
+				var $input = $('[data-input-name="' + $name + '"]');
+				if( response.hasOwnProperty('string') && $input.length > 0 ) {
+					$input.val(response.string);
+				}
+			}
+		});
+	});
+
+	/*
+	 * Allow client to add or remove additional 
+	 * rows when, for example, adding in custom
+	 * fields
+	 */
+	var $addRows = (function() {
+
+		var $trigger = $('[data-add-row]'),
+
+		setRowsInput = function() {
+			$('input[name="rows"]').val($('[data-row-index]').length);
+		},
+
+		addRow = function() {
+			var $prev = $('[data-row-index]').last();
+			var $index = $prev.data('row-index') + 1;
+			$.ajax({
+				type: "GET",
+				url: $prev.data('row-html'),
+				data: {
+					index: $index
+				},
+				success: function(response) {
+					$prev.closest('[data-row-container]').append(response.html);
+					setRowsInput();
+				}
+			})
+		},
+
+		initEvents = function() {
+			$(document).on('click', '[data-add-row]', function(e) {
+				e.preventDefault();
+				addRow();
+			});
+			$(document).on('click', '[data-remove-row]', function(e) {
+				e.preventDefault();
+				var $count = $('[data-row-index]').length;
+				if( $count > 1 ) {
+					$(this).closest('[data-row-index]').remove();
+				}
+			});
+		},
+
+		init = function() {
+			setRowsInput();
+			initEvents();
+		};
+
+		return {init: init};
+
+	})();
+
+	$addRows.init();
+
+	/*
+	 * Bootstrap collapses
+	 */
 	$(document).on('click', '[data-toggle="collapse"]', function(e) {
 		e.preventDefault();
 		$(this).collapse();
@@ -97,7 +278,7 @@ jQuery(document).ready(function($) {
 					$container.html(response.html);
 				},
 				error: function(response) {
-					console.error('response');
+					console.error(response);
 				}
 			});
 		}

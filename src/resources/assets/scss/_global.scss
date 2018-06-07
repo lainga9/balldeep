@@ -9,6 +9,10 @@ html {
 	font-size: 16px;
 	font-family: $font-primary;
 	color: $font-primary-color;
+
+	&--login {
+		padding-left: 0;
+	}
 }
 
 img {
@@ -17,6 +21,11 @@ img {
 
 [data-sortable] {
 	cursor: move;
+
+	input:disabled,
+	[readonly] {
+		cursor: move;
+	}
 }
 
 [data-select-media] {

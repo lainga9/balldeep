@@ -61,9 +61,31 @@ class PostsController extends Controller {
 			$view = 'vendor.balldeep.posts.index';
 		}
 
-		$posts = $type->posts()->latest()->get();
+		$posts = $type->posts()
+					->latest()
+					->paginate($type->postsPerPage());
 
 		return view($view, compact('posts', 'type'));
+	}
+
+	/**
+	 * Show main blog page
+	 * 
+	 * @return Response
+	 */
+	public function type(Request $request)
+	{
+		$path = $request->path();
+
+		if( ! $path ) abort(404);
+
+		$config = config('balldeep.post_type_urls');
+
+		if( ! in_array($path, $config) ) abort(404);
+
+		$type = array_search($path, $config);
+
+		return $this->index(str_plural($type));
 	}
 
 	/**
@@ -145,7 +167,9 @@ class PostsController extends Controller {
 			$view = 'vendor.balldeep.posts.index';
 		}
 
-		$posts = $tax->posts;
+		$posts = $tax->posts()
+					->latest()
+					->paginate($type->postsPerPage());
 
 		return view($view, compact('type', 'tax', 'posts'));
 	}

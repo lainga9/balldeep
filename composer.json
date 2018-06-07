@@ -2,11 +2,11 @@
     "name": "lainga9/balldeep",
     "description": "Hoo-rah",
     "require": {
-        "laravel/framework": "^5.6",
+        "laravel/framework": "5.6.*",
         "php": ">=7.0.0",
         "roumen/sitemap": "2.8.*",
         "spatie/laravel-medialibrary": "^7.0.0",
-        "cviebrock/eloquent-sluggable": "^4.5",
+        "cviebrock/eloquent-sluggable": "4.5.*",
         "silber/bouncer": "v1.0.0-rc.1"
     },
     "autoload": {
@@ -40,5 +40,6 @@
               "php artisan vendor:publish --provider=\"Spatie\\MediaLibrary\\MediaLibraryServiceProvider\" --tag=\"migrations\"",
               "php artisan vendor:publish --provider=\"Spatie\\MediaLibrary\\MediaLibraryServiceProvider\" --tag=\"config\""
         ]
-    }
+    },
+    "minimum-stability": "dev"
 }

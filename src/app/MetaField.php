@@ -2,6 +2,7 @@
 
 namespace Lainga9\BallDeep\app;
 
+use Lainga9\BallDeep\app\Fields\FieldAttributes;
 use Exception;
 
 class MetaField extends Model {
@@ -26,6 +27,18 @@ class MetaField extends Model {
 	 * @var string
 	 */
 	protected $table = 'bd_meta_fields';
+
+	/**
+	 * The field types which should have options 
+	 * attached e.g. select, checkboxes etc
+	 * 
+	 * @var array
+	 */
+	protected static $typesWithOptions = [
+		'select',
+		'checkboxes',
+		'radio'
+	];
 
 	/*
 	|--------------------------------------------------------------------------
@@ -70,13 +83,30 @@ class MetaField extends Model {
 	|
 	*/
 
+	/**
+	 * Options are added as new lines in a textarea. 
+	 * Convert these new lines into an array and then
+	 * serialise them.
+	 * 
+	 * @param string $options
+	 */
 	public function setOptionsAttribute($options)
 	{
 		$options = preg_split("/\R/", $options);
 
+		$options = array_map(function($elem) {
+			return trim($elem);
+		}, $options);
+
 		$this->attributes['options'] = serialize($options);
 	}
 
+	/**
+	 * Unserialise the stored options when returning them.
+	 * 
+	 * @param  string $options
+	 * @return string
+	 */
 	public function getOptionsAttribute($options)
 	{
 		if( ! $options ) return null;
@@ -88,7 +118,7 @@ class MetaField extends Model {
 	{
 		try
 		{
-			return Fields\FieldFactory::getField($this);
+			return Fields\FieldFactory::getField(new FieldAttributes($this));
 		}
 
 		catch( Exception $e )
@@ -121,5 +151,23 @@ class MetaField extends Model {
 		{
 			return $e->getMessage();
 		}
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Checks
+	|--------------------------------------------------------------------------
+	|
+	*/
+
+	/**
+	 * Check if the form field should have options attached to
+	 * it e.g. dropdown, checkboxes etc
+	 * 
+	 * @return boolean
+	 */
+	public function hasOptions()
+	{
+		return in_array($this->type, self::$typesWithOptions);
 	}
 }
