@@ -170,7 +170,7 @@ class BallDeep {
 	 * 
 	 * @return string
 	 */
-	public function siteEmailAddress()
+	public static function siteEmailAddress()
 	{
 		$setting = Setting::getValue('site_email');
 
@@ -188,4 +188,21 @@ class BallDeep {
 		return Setting::getValue($key);
 	}
 
+	/**
+	 * Return the HTML which is used when adding the button
+	 * to content editor which allows you to insert a form
+	 * 
+	 * @return string
+	 */
+	public static function getFormShortcodes()
+	{
+		$return = '';
+
+		foreach( Form::all() as $form )
+		{
+			$return .= sprintf('<div data-code="{form id:%d}">%s</div>', $form->id, $form->name);
+		}
+
+		return $return;
+	}
 }

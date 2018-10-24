@@ -15,7 +15,8 @@ mix.js('src/resources/assets/js/app.js', 'src/dist/')
 	.js('src/resources/assets/js/frontend.js', 'src/dist/')
 	.sass('src/resources/assets/scss/app.scss', 'src/dist/')
 	.sass('src/resources/assets/scss/frontend.scss', 'src/dist/')
-	.copy('node_modules/trumbowyg/dist/ui/icons.svg', 'src/dist/icons.svg');
+	.copy('node_modules/trumbowyg/dist/ui/icons.svg', 'src/dist/icons.svg')
+	.copy('node_modules/summernote/dist/font/', 'src/dist/');
 
 // Full API
 // mix.js(src, output);

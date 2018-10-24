@@ -6,6 +6,7 @@
 // Node modules
 @import '~bootstrap/scss/bootstrap';
 @import "~trumbowyg/dist/ui/sass/trumbowyg";
+@import "~summernote/dist/summernote";
 
 // Global
 @import "type";
@@ -26,3 +27,4 @@
 @import "menus";
 @import "forms";
 @import "grids";
+@import "summernote";

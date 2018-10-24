@@ -17,7 +17,12 @@
 				</div>
 				<div class="form-group">
 					<label for="name" class="form-label">Content</label>
-					<textarea data-trumbo name="content" class="form-control">{!! old('content') !!}</textarea>
+					<textarea 
+						data-content-editor
+						name="content"
+						class="form-control"
+						data-shortcodes='{!! BallDeep::getFormShortcodes() !!}'
+					>{!! old('content') !!}</textarea>
 				</div>
 
 				@if( $type->metaGroups->isNotEmpty() )

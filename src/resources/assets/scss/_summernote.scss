@@ -1,0 +1,16 @@
+.note-editor.note-frame {
+	border: 1px solid $lighter-grey;
+	box-shadow: none;
+}
+
+/**
+ * Provider variables dropdown in summernote editor
+ */
+.panel-heading.note-toolbar .dropdown-menu.dropdown-variables {
+	padding: 10px;
+	min-width: 120px;
+}
+
+.note-editor.note-frame .note-editing-area .note-editable {
+	min-height: 120px;
+}

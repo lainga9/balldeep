@@ -388,12 +388,12 @@ class Post extends Model {
 	public function facebookMeta()
 	{
 		return BallDeep::getFacebookMetaTags(
-			$this->metaTitle(),
+			$this->socialTitle(),
 			$this->url(),
 			$this->media ?
 				$this->media->getFirstMediaUrl() :
 				null,
-			$this->metaDescription()
+			$this->socialDescription()
 		);
 	}
 
@@ -405,11 +405,11 @@ class Post extends Model {
 	public function twitterMeta()
 	{
 		return BallDeep::getTwitterMetaTags(
-			$this->metaTitle(),
+			$this->socialTitle(),
 			$this->media ?
 				$this->media->getFirstMediaUrl() :
 				null,
-			$this->metaDescription()
+			$this->socialDescription()
 		);
 	}
 

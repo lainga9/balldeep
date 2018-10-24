@@ -27,7 +27,8 @@
 					<textarea 
 						name="content"
 						class="form-control"
-						data-trumbo
+						data-content-editor
+						data-shortcodes='{!! BallDeep::getFormShortcodes() !!}'
 					>{!! $revision ? $revision->content() : old('content', $post->content) !!}</textarea>
 				</div>
 

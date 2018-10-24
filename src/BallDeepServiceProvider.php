@@ -54,6 +54,10 @@ class BallDeepServiceProvider extends ServiceProvider {
             __DIR__.'/dist' => public_path('vendor/'.$this->packageName),
         ], 'public');
 
+        $this->publishes([
+            __DIR__.'/../fonts' => public_path('fonts'),
+        ], 'public');
+
         // Publish your seed's publisher
         $this->publishes([
             __DIR__.'/database/seeds/' => base_path('/database/seeds')

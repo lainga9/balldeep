@@ -4,9 +4,65 @@ require('./jquery-ui.min');
 require('trumbowyg');
 window.Tether = require('tether');
 require('bootstrap');
+require('summernote');
 
 jQuery(document).ready(function($) {
 
+	$('[data-content-editor]').each(function() {
+		var $this = $(this);
+
+		var ShortcodesButton = function(context) {
+
+			var ui = $.summernote.ui;
+
+			var $contents = $this.data('shortcodes');
+
+			return ui.buttonGroup([
+				ui.button({
+					className: 'dropdown-toggle',
+					contents: '<span class="fa fa-envelope"></span> <span class="caret"></span>',
+					tooltip: "Insert Form",
+					data: {
+						toggle: 'dropdown'
+					},
+					click: function() {
+						context.invoke('editor.saveRange');
+					}
+				}),
+				ui.dropdown({
+					className: 'dropdown-variables',
+					contents: $contents,
+					callback: function ($dropdown) {
+						$dropdown.find('div').each(function () {
+							$(this).click(function() {
+								context.invoke('editor.restoreRange');
+								context.invoke('editor.focus');
+								context.invoke("editor.insertText", $(this).data('code'));
+							});
+						});
+					}
+				})]).render();
+		}
+
+		$this.summernote({
+			toolbar: [
+				['style', ['bold', 'italic', 'underline', 'clear']],
+				['font', ['strikethrough', 'superscript', 'subscript']],
+				['fontsize', ['fontsize']],
+				['color', ['color']],
+				['para', ['ul', 'ol', 'paragraph']],
+				['height', ['height']],
+				['mybutton', ['shortcodes']]
+			],
+			buttons: {
+    			shortcodes: ShortcodesButton
+  			}
+		});
+	});
+
+	/*
+	 * Insert text to an input at the cursor position
+	 */
 	$(document).on('click', '[data-insert-text]', function(e) {
 		e.preventDefault();
 		var $this = $(this);

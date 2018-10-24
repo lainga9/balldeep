@@ -62,7 +62,7 @@ php artisan storage:link
 
 ```
 
-Add
+In config/auth.php, add
 
 ```
 'balldeep' => [
@@ -80,11 +80,11 @@ to guards array and
 ],
 ```
 
-to providers array in config/auth.php.
+to providers array.
 
 Add 
 
-```Lainga9\BallDeep\app\BallDeep::class```
+```'BallDeep' => Lainga9\BallDeep\app\BallDeep::class```
 
 to aliases array in config/app.php
 
